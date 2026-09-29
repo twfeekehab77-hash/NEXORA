@@ -1,7 +1,9 @@
 import { useState } from "react";
+import Login from "./Login";
 import "./App.css";
 
 function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
   const [active, setActive] = useState("Home");
 
   const menu = [
@@ -11,6 +13,10 @@ function App() {
     { name: "Notifications", icon: "🔔" },
     { name: "Profile", icon: "👤" },
   ];
+
+  if (!loggedIn) {
+    return <Login onLogin={() => setLoggedIn(true)} />;
+  }
 
   return (
     <div className="nexora">
@@ -44,9 +50,12 @@ function App() {
       <main className="content">
         <header className="topbar">
           <h1>{active}</h1>
+
           <div className="search">
-            🔎 <input placeholder="Search NEXORA..." />
+            🔎
+            <input placeholder="Search NEXORA..." />
           </div>
+
           <div className="profile-mini">D</div>
         </header>
 
@@ -55,13 +64,17 @@ function App() {
           <p>
             Connect, share, discover and communicate in one place.
           </p>
-          <button className="primary-btn">Create your first post</button>
+
+          <button className="primary-btn">
+            Create your first post
+          </button>
         </section>
 
         <section className="feed">
           <article className="post">
             <div className="post-header">
               <div className="avatar">D</div>
+
               <div>
                 <strong>NEXORA Developer ✓</strong>
                 <span>@developer · Just now</span>
