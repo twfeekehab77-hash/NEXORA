@@ -1971,7 +1971,7 @@ function App() {
                     <div className="profile-main-info">
                       <div className="profile-title-row">
                         <div>
-                          <h2>{selectedUserProfile.full_name || "NEXORA User"}</h2>
+                          <h2>{selectedUserProfile.full_name || "NEXORA User"} {selectedUserProfile.is_owner && (<span title="NEXORA Owner" style={{marginLeft:"8px",padding:"3px 7px",borderRadius:"999px",background:"linear-gradient(135deg,#f59e0b,#facc15,#d97706)",color:"#fff",fontSize:"11px",fontWeight:"800",boxShadow:"0 2px 6px rgba(245,158,11,.4)",verticalAlign:"middle"}}>👑 OWNER</span>)}</h2>
                           <p>@{selectedUserProfile.username || "user"}</p>
                         </div>
                         <div className="profile-actions">
