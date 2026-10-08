@@ -2051,6 +2051,47 @@ function App() {
               </>
             )}
           </section>
+        ) : active === "Developer" && profile?.is_owner ? (
+          <section className="welcome">
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:"12px",marginBottom:"20px"}}>
+              <div>
+                <h2>👑 Developer Control Panel</h2>
+                <p>Full control center for the NEXORA owner.</p>
+              </div>
+              <span style={{padding:"6px 10px",borderRadius:"999px",background:"linear-gradient(135deg,#f59e0b,#facc15,#d97706)",color:"#fff",fontWeight:"800",fontSize:"12px"}}>OWNER</span>
+            </div>
+
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:"14px"}}>
+              <div className="fb-right-card">
+                <strong>👥 Users</strong>
+                <h2>{users.length}</h2>
+                <span>Loaded users</span>
+              </div>
+
+              <div className="fb-right-card">
+                <strong>📝 Posts</strong>
+                <h2>{posts.length}</h2>
+                <span>Loaded posts</span>
+              </div>
+
+              <div className="fb-right-card">
+                <strong>🔔 Notifications</strong>
+                <h2>{unreadNotifications}</h2>
+                <span>Unread notifications</span>
+              </div>
+
+              <div className="fb-right-card">
+                <strong>💬 Messages</strong>
+                <h2>{users.length}</h2>
+                <span>Available contacts</span>
+              </div>
+            </div>
+
+            <div className="fb-right-card" style={{marginTop:"16px"}}>
+              <h3>⚙️ Developer Tools</h3>
+              <p style={{opacity:.7}}>More owner controls will be added here.</p>
+            </div>
+          </section>
         ) : active === "Notifications" ? (
           <section className="welcome">
             <div
@@ -3149,7 +3190,7 @@ function App() {
                 </div>
 
                 <div className="fb-right-card fb-shortcuts">
-                  <div className="fb-right-title">Your shortcuts</div>
+                  <div className="fb-right-title">Your shortcuts</div>{profile?.is_owner && (<button onClick={() => setActive("Developer")}><span className="shortcut-icon">👑</span>Developer Control Panel</button>)}
                   <button onClick={() => setActive("Explore")}><span className="shortcut-icon"><NIcon name="Explore" size={17} /></span>Explore people</button>
                   <button onClick={() => openNotifications()}><span className="shortcut-icon"><NIcon name="Notifications" size={17} /></span>Notifications</button>
                   <button onClick={() => { setActive("Messages"); setShowProfile(false); loadUsers(); }}><span className="shortcut-icon"><NIcon name="Messages" size={17} /></span>Messages</button>
