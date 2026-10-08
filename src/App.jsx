@@ -148,6 +148,7 @@ function App() {
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [totalPosts, setTotalPosts] = useState(0);
 
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -263,6 +264,19 @@ function App() {
     };
   }, []);
 
+  async function loadTotalPosts() {
+    const { count, error } = await supabase
+      .from("posts")
+      .select("id", { count: "exact", head: true });
+
+    if (error) {
+      console.error("Total posts:", error);
+      return;
+    }
+
+    setTotalPosts(count || 0);
+  }
+
   async function loadTotalUsers() {
     const { count, error } = await supabase
       .from("profiles")
@@ -282,6 +296,7 @@ function App() {
       loadPosts(userId),
       loadStories(),
       loadTotalUsers(),
+      loadTotalPosts(),
     ]);
   }
 
@@ -2085,7 +2100,7 @@ function App() {
 
               <div className="fb-right-card">
                 <strong>📝 Posts</strong>
-                <h2>{posts.length}</h2>
+                <h2>{totalPosts}</h2>
                 <span>Loaded posts</span>
               </div>
 
