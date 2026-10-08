@@ -1,0 +1,861 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+.nexora-auth-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  overflow: hidden;
+  background: #071426;
+  font-family: Arial, Tahoma, sans-serif;
+}
+
+/* =========================
+   LEFT EGYPT SECTION
+========================= */
+
+.nexora-egypt-side {
+  width: 52%;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.egypt-sky {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 55% 30%,
+      rgba(31, 142, 255, 0.4),
+      transparent 24%
+    ),
+    linear-gradient(
+      180deg,
+      #031a3c 0%,
+      #082d59 46%,
+      #0b3b68 65%,
+      #04182e 100%
+    );
+}
+
+.egypt-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(35px);
+  pointer-events: none;
+}
+
+.glow-one {
+  width: 330px;
+  height: 330px;
+  right: 8%;
+  top: 12%;
+  background: rgba(35, 156, 255, 0.2);
+}
+
+.glow-two {
+  width: 300px;
+  height: 300px;
+  left: 5%;
+  bottom: 5%;
+  background: rgba(255, 159, 67, 0.1);
+}
+
+/* Logo */
+
+.nexora-hero-brand {
+  position: absolute;
+  z-index: 8;
+  top: 9%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  width: 90%;
+}
+
+.hero-logo {
+  width: 150px;
+  height: 115px;
+  margin: 0 auto 8px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-logo span {
+  position: relative;
+  z-index: 2;
+  font-size: 105px;
+  line-height: 1;
+  font-weight: 900;
+  font-style: italic;
+  color: #159cff;
+  text-shadow:
+    0 0 15px rgba(21, 156, 255, 0.5),
+    0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.hero-logo i {
+  position: absolute;
+  width: 155px;
+  height: 35px;
+  border: 7px solid #f5f7fa;
+  border-left-color: #0792ff;
+  border-radius: 50%;
+  transform: rotate(-13deg);
+  top: 53px;
+  left: -3px;
+  z-index: 3;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
+}
+
+.nexora-hero-brand h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(45px, 5vw, 76px);
+  font-weight: 900;
+  letter-spacing: 4px;
+  text-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
+.hero-tagline {
+  margin-top: 13px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 17px;
+  color: #fff;
+  font-size: clamp(15px, 1.5vw, 23px);
+  letter-spacing: 1px;
+}
+
+.hero-tagline b {
+  color: #fff;
+}
+
+/* Cairo */
+
+.cairo-skyline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 25%;
+  height: 28%;
+  opacity: 0.8;
+}
+
+.building {
+  position: absolute;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    #142f49,
+    #34556d,
+    #132b44
+  );
+  box-shadow: inset 0 0 20px rgba(255, 210, 100, 0.08);
+}
+
+.building-one {
+  width: 13%;
+  height: 55%;
+  left: 2%;
+}
+
+.building-two {
+  width: 11%;
+  height: 72%;
+  left: 18%;
+}
+
+.building-three {
+  width: 15%;
+  height: 45%;
+  right: 2%;
+}
+
+.building-four {
+  width: 12%;
+  height: 67%;
+  right: 19%;
+}
+
+.building-five {
+  width: 17%;
+  height: 38%;
+  left: 39%;
+}
+
+.cairo-tower {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 95%;
+  width: 95px;
+  z-index: 4;
+}
+
+.tower-top {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 8px;
+  height: 13%;
+  transform: translateX(-50%);
+  background: #8ba2b5;
+}
+
+.tower-body {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  width: 75px;
+  height: 78%;
+  transform: translateX(-50%);
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 215, 130, 0.15) 0 4px,
+      transparent 4px 8px
+    ),
+    linear-gradient(
+      90deg,
+      #526d7d,
+      #b0a58a,
+      #566e7e
+    );
+  clip-path: polygon(
+    45% 0,
+    55% 0,
+    67% 100%,
+    33% 100%
+  );
+}
+
+.tower-base {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 95px;
+  height: 10%;
+  transform: translateX(-50%);
+  background: #3a5365;
+  clip-path: polygon(
+    28% 0,
+    72% 0,
+    100% 100%,
+    0 100%
+  );
+}
+
+/* Flag */
+
+.egypt-flag {
+  position: absolute;
+  z-index: 6;
+  left: -8%;
+  bottom: 7%;
+  width: 92%;
+  height: 43%;
+  transform: rotate(-8deg);
+  border-radius: 4px 35px 15px 0;
+  overflow: hidden;
+  box-shadow:
+    0 25px 50px rgba(0, 0, 0, 0.45),
+    inset 0 0 50px rgba(255, 255, 255, 0.1);
+}
+
+.flag-red,
+.flag-white,
+.flag-black {
+  height: 33.333%;
+  width: 100%;
+}
+
+.flag-red {
+  background:
+    linear-gradient(
+      120deg,
+      #a50000,
+      #ef1717 48%,
+      #990000
+    );
+}
+
+.flag-white {
+  position: relative;
+  background:
+    linear-gradient(
+      120deg,
+      #f4f4f2,
+      #fff 45%,
+      #d9d9d7
+    );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flag-white span {
+  font-size: 55px;
+  filter: sepia(1) saturate(2);
+  transform: rotate(8deg);
+}
+
+.flag-black {
+  background:
+    linear-gradient(
+      120deg,
+      #050505,
+      #222 45%,
+      #000
+    );
+}
+
+.egypt-wave {
+  position: absolute;
+  bottom: 0;
+  left: -10%;
+  width: 120%;
+  height: 23%;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(7, 30, 52, 0),
+      rgba(2, 11, 24, 0.88)
+    );
+  z-index: 7;
+  pointer-events: none;
+}
+
+.hero-bottom-text {
+  position: absolute;
+  z-index: 9;
+  bottom: 5.5%;
+  left: 8%;
+  color: white;
+}
+
+.hero-bottom-text h2 {
+  margin: 0;
+  font-size: clamp(20px, 2.1vw, 32px);
+  font-weight: 500;
+}
+
+.hero-bottom-text div {
+  width: 70px;
+  height: 5px;
+  border-radius: 20px;
+  background: #168fff;
+  margin-top: 10px;
+  margin-right: auto;
+}
+
+.egypt-label {
+  position: absolute;
+  z-index: 10;
+  bottom: 3%;
+  right: 7%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+}
+
+/* =========================
+   LOGIN SECTION
+========================= */
+
+.nexora-login-side {
+  width: 48%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 35px;
+  position: relative;
+  background:
+    radial-gradient(
+      circle at 50% 20%,
+      rgba(20, 76, 143, 0.16),
+      transparent 35%
+    ),
+    #071322;
+}
+
+.login-card {
+  width: min(100%, 580px);
+  max-height: calc(100vh - 50px);
+  overflow-y: auto;
+  padding: 30px 38px;
+  border: 1px solid rgba(73, 133, 207, 0.42);
+  border-radius: 23px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(10, 27, 48, 0.98),
+      rgba(5, 17, 31, 0.98)
+    );
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.login-card::-webkit-scrollbar {
+  width: 4px;
+}
+
+.login-card::-webkit-scrollbar-thumb {
+  background: #166ed4;
+  border-radius: 10px;
+}
+
+.mobile-brand {
+  display: none;
+}
+
+/* Login logo */
+
+.login-brand {
+  text-align: center;
+  margin-bottom: 23px;
+}
+
+.login-logo {
+  position: relative;
+  width: 80px;
+  height: 70px;
+  margin: 0 auto 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-logo span {
+  font-size: 65px;
+  font-weight: 900;
+  font-style: italic;
+  color: #149bff;
+  line-height: 1;
+}
+
+.login-logo i {
+  position: absolute;
+  width: 84px;
+  height: 19px;
+  border: 4px solid white;
+  border-left-color: #008cff;
+  border-radius: 50%;
+  transform: rotate(-12deg);
+  top: 36px;
+}
+
+.login-brand h2 {
+  margin: 0;
+  color: white;
+  font-size: 40px;
+  letter-spacing: 2px;
+  font-weight: 900;
+}
+
+.login-brand h3 {
+  margin: 12px 0 8px;
+  color: #fff;
+  font-size: 23px;
+}
+
+.login-brand p {
+  margin: 0 auto;
+  max-width: 390px;
+  color: #91a3b9;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+/* Form */
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.input-group label {
+  color: #a9b9cc;
+  font-size: 12px;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-wrapper input {
+  width: 100%;
+  height: 53px;
+  border: 1px solid #294a70;
+  border-radius: 15px;
+  padding: 0 48px 0 48px;
+  outline: none;
+  background: rgba(4, 17, 31, 0.65);
+  color: white;
+  font-size: 13px;
+  transition: 0.2s;
+  direction: rtl;
+}
+
+.input-wrapper input::placeholder {
+  color: #70849c;
+}
+
+.input-wrapper input:focus {
+  border-color: #168fff;
+  box-shadow: 0 0 0 3px rgba(22, 143, 255, 0.1);
+}
+
+.input-icon {
+  position: absolute;
+  right: 17px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #b8cae0;
+  font-size: 19px;
+  z-index: 2;
+}
+
+.eye-button {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #a8bbd2;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.forgot-button {
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  color: #078cff;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+}
+
+.login-message {
+  padding: 10px 13px;
+  border-radius: 10px;
+  border: 1px solid rgba(22, 143, 255, 0.35);
+  background: rgba(22, 143, 255, 0.08);
+  color: #b8dfff;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.login-main-button {
+  width: 100%;
+  height: 55px;
+  border: none;
+  border-radius: 28px;
+  background: linear-gradient(
+    100deg,
+    #087df5,
+    #168fff
+  );
+  color: white;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow:
+    0 12px 30px rgba(8, 125, 245, 0.25);
+  transition: 0.2s;
+}
+
+.login-main-button:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 15px 35px rgba(8, 125, 245, 0.34);
+}
+
+.login-main-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.login-main-button span {
+  display: inline-block;
+  margin-right: 10px;
+  font-size: 21px;
+  vertical-align: -1px;
+}
+
+/* Divider */
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  color: #778ba3;
+  font-size: 12px;
+}
+
+.or-divider span {
+  height: 1px;
+  flex: 1;
+  background: #263d58;
+}
+
+.or-divider b {
+  font-weight: 400;
+}
+
+/* Google */
+
+.google-button {
+  width: 100%;
+  height: 51px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  border: 1px solid #087df5;
+  border-radius: 27px;
+  background: transparent;
+  color: #128fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  transition: 0.2s;
+}
+
+.google-button:hover {
+  background: rgba(8, 125, 245, 0.08);
+}
+
+.google-icon {
+  width: 23px;
+  height: 23px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: white;
+  color: #4285f4;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+/* Switch */
+
+.switch-account {
+  margin-top: 22px;
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  color: #8395aa;
+  font-size: 12px;
+}
+
+.switch-account button {
+  border: none;
+  background: transparent;
+  color: #0b91ff;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+/* Language */
+
+.language-selector {
+  margin: 21px auto 0;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #a5b5c8;
+  font-size: 12px;
+}
+
+.arrow-down {
+  color: #72869e;
+  font-size: 17px;
+}
+
+/* Footer */
+
+.login-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  margin-top: 18px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(53, 77, 104, 0.45);
+  color: #536b86;
+  font-size: 10px;
+}
+
+.login-footer span:first-child {
+  color: #128fff;
+  font-weight: 900;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1000px) {
+  .nexora-egypt-side {
+    width: 46%;
+  }
+
+  .nexora-login-side {
+    width: 54%;
+    padding: 20px;
+  }
+
+  .login-card {
+    padding: 25px;
+  }
+
+  .nexora-hero-brand h1 {
+    font-size: 48px;
+  }
+
+  .hero-logo {
+    transform: scale(0.8);
+  }
+
+  .hero-tagline {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 760px) {
+  .nexora-auth-page {
+    display: block;
+    overflow-y: auto;
+  }
+
+  .nexora-egypt-side {
+    width: 100%;
+    min-height: 260px;
+    height: 260px;
+  }
+
+  .egypt-sky {
+    min-height: 260px;
+  }
+
+  .nexora-hero-brand {
+    top: 10px;
+  }
+
+  .hero-logo {
+    width: 80px;
+    height: 60px;
+    transform: scale(0.55);
+    margin-bottom: -10px;
+  }
+
+  .nexora-hero-brand h1 {
+    font-size: 39px;
+  }
+
+  .hero-tagline {
+    margin-top: 2px;
+    font-size: 12px;
+    gap: 8px;
+  }
+
+  .cairo-skyline {
+    bottom: 0;
+    height: 35%;
+  }
+
+  .egypt-flag {
+    width: 70%;
+    height: 40%;
+    left: -13%;
+    bottom: -3%;
+    opacity: 0.75;
+  }
+
+  .hero-bottom-text {
+    display: none;
+  }
+
+  .egypt-label {
+    bottom: 8px;
+  }
+
+  .nexora-login-side {
+    width: 100%;
+    min-height: calc(100vh - 260px);
+    padding: 18px 13px 30px;
+    align-items: flex-start;
+  }
+
+  .login-card {
+    width: 100%;
+    max-height: none;
+    padding: 25px 19px;
+    border-radius: 20px;
+  }
+}
+
+@media (max-width: 430px) {
+  .nexora-egypt-side {
+    min-height: 225px;
+    height: 225px;
+  }
+
+  .egypt-sky {
+    min-height: 225px;
+  }
+
+  .nexora-hero-brand h1 {
+    font-size: 34px;
+  }
+
+  .hero-tagline {
+    font-size: 10px;
+  }
+
+  .login-brand h2 {
+    font-size: 34px;
+  }
+
+  .login-brand h3 {
+    font-size: 20px;
+  }
+
+  .login-brand p {
+    font-size: 11px;
+  }
+}
