@@ -150,6 +150,9 @@ function App() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalPosts, setTotalPosts] = useState(0);
   const [totalNotifications, setTotalNotifications] = useState(0);
+  const [blockedUsers, setBlockedUsers] = useState({});
+  const [reports, setReports] = useState([]);
+  const [adminBans, setAdminBans] = useState([]);
 
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -265,6 +268,104 @@ function App() {
     };
   }, []);
 
+  async function blockUser(userId, reason = "Blocked by user") {
+    if (!session || !userId || userId === session.user.id) return;
+
+    const { error } = await supabase
+      .from("user_bans")
+      .insert({
+        user_id: userId,
+        banned_by: session.user.id,
+        reason,
+      });
+
+    if (error) {
+      console.error("Block user:", error);
+      setSaveMessage(error.message);
+      return;
+    }
+
+    setBlockedUsers((prev) => ({ ...prev, [userId]: true }));
+    setSaveMessage("User blocked successfully.");
+  }
+
+  async function reportUser(userId, reason = "Other", details = "") {
+    if (!session || !userId || userId === session.user.id) return;
+
+    const { error } = await supabase
+      .from("user_reports")
+      .insert({
+        reporter_id: session.user.id,
+        reported_user_id: userId,
+        reason,
+        details,
+      });
+
+    if (error) {
+      console.error("Report user:", error);
+      setSaveMessage(error.message);
+      return;
+    }
+
+    setSaveMessage("Report submitted successfully.");
+  }
+
+  async function loadBlockedUsers(userId) {
+    if (!userId) return;
+
+    const { data, error } = await supabase
+      .from("user_bans")
+      .select("user_id")
+      .eq("banned_by", userId);
+
+    if (error) {
+      console.error("Blocked users:", error);
+      return;
+    }
+
+    const blockedData = {};
+
+    (data || []).forEach((ban) => {
+      blockedData[ban.user_id] = true;
+    });
+
+    setBlockedUsers(blockedData);
+  }
+
+  async function loadDeveloperReports() {
+    if (!profile?.is_owner) return;
+
+    const { data, error } = await supabase
+      .from("user_reports")
+      .select("id,reporter_id,reported_user_id,reason,details,status,created_at")
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (error) {
+      console.error("Developer reports:", error);
+      return;
+    }
+
+    setReports(data || []);
+  }
+
+  async function loadDeveloperBans() {
+    if (!profile?.is_owner) return;
+
+    const { data, error } = await supabase
+      .from("user_bans")
+      .select("id,user_id,banned_by,reason,created_at")
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (error) {
+      console.error("Developer bans:", error);
+      return;
+    }
+
+    setAdminBans(data || []);
+  }
+
   async function loadTotalNotifications() {
     const { count, error } = await supabase
       .from("notifications")
@@ -310,9 +411,17 @@ function App() {
       loadPosts(userId),
       loadStories(),
       loadTotalUsers(),
+      loadBlockedUsers(userId),
       loadTotalPosts(),
       loadTotalNotifications(),
     ]);
+
+    if (userId === "e4a5054b-981a-483e-bcec-3017d120c13f") {
+      await Promise.all([
+        loadDeveloperReports(),
+        loadDeveloperBans(),
+      ]);
+    }
   }
 
   async function loadProfile(userId) {
@@ -2043,6 +2152,18 @@ function App() {
                           >
                             <span>{following[selectedUserProfile.id] ? t.following : t.follow}</span>
                           </button>
+                          <button
+                            className="profile-action secondary"
+                            onClick={() => blockUser(selectedUserProfile.id)}
+                          >
+                            <span>🚫 Block</span>
+                          </button>
+                          <button
+                            className="profile-action secondary"
+                            onClick={() => reportUser(selectedUserProfile.id)}
+                          >
+                            <span>⚠️ Report</span>
+                          </button>
                         </div>
                       </div>
 
@@ -2132,9 +2253,59 @@ function App() {
               </div>
             </div>
 
-            <div className="fb-right-card" style={{marginTop:"16px"}}>
-              <h3>⚙️ Developer Tools</h3>
-              <p style={{opacity:.7}}>More owner controls will be added here.</p>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:"16px",marginTop:"16px"}}>
+              <div className="fb-right-card">
+                <h3>📋 Reports ({reports.length})</h3>
+                {reports.length === 0 ? (
+                  <p style={{opacity:.7}}>No reports yet.</p>
+                ) : (
+                  <div style={{display:"grid",gap:"10px",marginTop:"12px"}}>
+                    {reports.map((report) => (
+                      <div key={report.id} style={{padding:"12px",borderRadius:"12px",background:"rgba(127,127,127,.08)"}}>
+                        <strong>⚠️ {report.reason}</strong>
+                        <div style={{fontSize:"12px",opacity:.7,marginTop:"5px"}}>
+                          Reported user: {report.reported_user_id || "Unknown"}
+                        </div>
+                        <div style={{fontSize:"12px",opacity:.7}}>
+                          Reporter: {report.reporter_id || "Unknown"}
+                        </div>
+                        {report.details && (
+                          <div style={{marginTop:"7px",fontSize:"13px"}}>
+                            {report.details}
+                          </div>
+                        )}
+                        <div style={{fontSize:"11px",opacity:.6,marginTop:"7px"}}>
+                          Status: {report.status}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="fb-right-card">
+                <h3>🚫 Bans / Blocks ({adminBans.length})</h3>
+                {adminBans.length === 0 ? (
+                  <p style={{opacity:.7}}>No bans or blocks yet.</p>
+                ) : (
+                  <div style={{display:"grid",gap:"10px",marginTop:"12px"}}>
+                    {adminBans.map((ban) => (
+                      <div key={ban.id} style={{padding:"12px",borderRadius:"12px",background:"rgba(127,127,127,.08)"}}>
+                        <strong>🚫 {ban.user_id}</strong>
+                        <div style={{fontSize:"12px",opacity:.7,marginTop:"5px"}}>
+                          Blocked by: {ban.banned_by || "Unknown"}
+                        </div>
+                        <div style={{fontSize:"13px",marginTop:"5px"}}>
+                          {ban.reason || "No reason provided"}
+                        </div>
+                        <div style={{fontSize:"11px",opacity:.6,marginTop:"7px"}}>
+                          {new Date(ban.created_at).toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </section>
         ) : active === "Notifications" ? (
