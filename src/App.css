@@ -137,6 +137,15 @@ nav {
   border: 0;
   outline: 0;
   margin-left: 8px;
+  color: #111827;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.search input::placeholder {
+  color: #6b7280;
+  opacity: 1;
 }
 
 .profile-mini {

@@ -290,23 +290,41 @@ function App() {
   }
 
   async function reportUser(userId, reason = "Other", details = "") {
-    if (!session || !userId || userId === session.user.id) return;
+    if (!session) {
+      setSaveMessage("You must be logged in to report a user.");
+      return;
+    }
 
-    const { error } = await supabase
+    if (!userId) {
+      setSaveMessage("No user selected to report.");
+      return;
+    }
+
+    if (userId === session.user.id) {
+      setSaveMessage("You cannot report yourself.");
+      return;
+    }
+
+    setSaveMessage("Sending report...");
+
+    const { data, error } = await supabase
       .from("user_reports")
       .insert({
         reporter_id: session.user.id,
         reported_user_id: userId,
         reason,
         details,
-      });
+      })
+      .select()
+      .single();
 
     if (error) {
       console.error("Report user:", error);
-      setSaveMessage(error.message);
+      setSaveMessage("Report failed: " + error.message);
       return;
     }
 
+    console.log("Report created:", data);
     setSaveMessage("Report submitted successfully.");
   }
 
@@ -2160,7 +2178,11 @@ function App() {
                           </button>
                           <button
                             className="profile-action secondary"
-                            onClick={() => reportUser(selectedUserProfile.id)}
+                            onClick={() => {
+  console.log("REPORT BUTTON CLICKED", selectedUserProfile?.id);
+  setSaveMessage("Report button clicked...");
+  reportUser(selectedUserProfile.id);
+}}
                           >
                             <span>⚠️ Report</span>
                           </button>
