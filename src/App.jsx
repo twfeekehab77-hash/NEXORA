@@ -147,6 +147,7 @@ function App() {
   const [notificationActors, setNotificationActors] = useState({});
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0);
 
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -262,11 +263,25 @@ function App() {
     };
   }, []);
 
+  async function loadTotalUsers() {
+    const { count, error } = await supabase
+      .from("profiles")
+      .select("id", { count: "exact", head: true });
+
+    if (error) {
+      console.error("Total users:", error);
+      return;
+    }
+
+    setTotalUsers(count || 0);
+  }
+
   async function loadHomeData(userId) {
     await Promise.all([
       loadProfile(userId),
       loadPosts(userId),
       loadStories(),
+      loadTotalUsers(),
     ]);
   }
 
@@ -2064,7 +2079,7 @@ function App() {
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:"14px"}}>
               <div className="fb-right-card">
                 <strong>👥 Users</strong>
-                <h2>{users.length}</h2>
+                <h2>{totalUsers}</h2>
                 <span>Loaded users</span>
               </div>
 
