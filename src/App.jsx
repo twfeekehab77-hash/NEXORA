@@ -149,6 +149,7 @@ function App() {
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalPosts, setTotalPosts] = useState(0);
+  const [totalNotifications, setTotalNotifications] = useState(0);
 
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -264,6 +265,19 @@ function App() {
     };
   }, []);
 
+  async function loadTotalNotifications() {
+    const { count, error } = await supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true });
+
+    if (error) {
+      console.error("Total notifications:", error);
+      return;
+    }
+
+    setTotalNotifications(count || 0);
+  }
+
   async function loadTotalPosts() {
     const { count, error } = await supabase
       .from("posts")
@@ -297,6 +311,7 @@ function App() {
       loadStories(),
       loadTotalUsers(),
       loadTotalPosts(),
+      loadTotalNotifications(),
     ]);
   }
 
@@ -2106,7 +2121,7 @@ function App() {
 
               <div className="fb-right-card">
                 <strong>🔔 Notifications</strong>
-                <h2>{unreadNotifications}</h2>
+                <h2>{totalNotifications}</h2>
                 <span>Unread notifications</span>
               </div>
 
