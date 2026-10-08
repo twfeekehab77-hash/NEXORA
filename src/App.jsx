@@ -273,7 +273,7 @@ function App() {
   async function loadProfile(userId) {
     const { data, error } = await supabase
       .from("profiles")
-      .select("id,username,full_name,avatar_url,bio")
+      .select("id,username,full_name,avatar_url,bio,is_owner")
       .eq("id", userId)
       .single();
 
@@ -539,7 +539,7 @@ function App() {
         error: profilesError,
       } = await supabase
         .from("profiles")
-        .select("id,username,full_name,avatar_url")
+        .select("id,username,full_name,avatar_url,is_owner")
         .in("id", userIds);
 
       if (profilesError) {
@@ -628,7 +628,7 @@ function App() {
         error: profilesError,
       } = await supabase
         .from("profiles")
-        .select("id,username,full_name,avatar_url")
+        .select("id,username,full_name,avatar_url,is_owner")
         .in("id", userIds);
 
       if (profilesError) {
@@ -906,7 +906,7 @@ function App() {
     if (actorIds.length > 0) {
       const { data: actors, error: actorsError } = await supabase
         .from("profiles")
-        .select("id,username,full_name,avatar_url")
+        .select("id,username,full_name,avatar_url,is_owner")
         .in("id", actorIds);
 
       if (actorsError) {
@@ -1840,7 +1840,7 @@ function App() {
                           }}
                         >
                           {user.full_name ||
-                            "NEXORA User"}
+                            "NEXORA User"} {user.is_owner && (<span title="NEXORA Owner" style={{marginLeft:"6px",padding:"2px 6px",borderRadius:"999px",background:"linear-gradient(135deg,#f59e0b,#facc15,#d97706)",color:"#fff",fontSize:"10px",fontWeight:"800",boxShadow:"0 1px 5px rgba(245,158,11,.4)",verticalAlign:"middle"}}>👑 OWNER</span>)}
                         </strong>
 
                         <div
@@ -3120,7 +3120,7 @@ function App() {
                       {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : avatarLetter}
                     </div>
                     <div>
-                      <strong>{profile?.full_name || "NEXORA User"}</strong>
+                      <strong>{profile?.full_name || "NEXORA User"} {profile?.is_owner && (<span title="NEXORA Owner" style={{marginLeft:"6px",padding:"2px 6px",borderRadius:"999px",background:"linear-gradient(135deg,#f59e0b,#facc15,#d97706)",color:"#fff",fontSize:"10px",fontWeight:"800",boxShadow:"0 1px 5px rgba(245,158,11,.4)",verticalAlign:"middle"}}>👑 OWNER</span>)}</strong>
                       <span>@{profile?.username || "user"}</span>
                     </div>
                   </button>
