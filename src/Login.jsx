@@ -48,8 +48,14 @@ export default function Login() {
           setMode("login");
         }
       }
-    } catch {
-      setMessage("حدث خطأ في الاتصال. حاول مرة أخرى.");
+
+    } catch (err) {
+      console.error("NEXORA authentication error:", err);
+      setMessage(
+        err instanceof Error
+          ? err.message
+          : "حدث خطأ غير معروف أثناء الاتصال."
+      );
     } finally {
       setLoading(false);
     }
