@@ -209,15 +209,16 @@ function App() {
       if (!mounted) return;
 
       setSession(currentSession);
+      setLoading(false);
 
       if (currentSession) {
-        await loadHomeData(currentSession.user.id);
-        await loadNotifications(currentSession.user.id);
-        await loadFollowing(currentSession.user.id);
-      }
-
-      if (mounted) {
-        setLoading(false);
+        Promise.all([
+          loadHomeData(currentSession.user.id),
+          loadNotifications(currentSession.user.id),
+          loadFollowing(currentSession.user.id),
+        ]).catch((error) => {
+          console.error("Background loading:", error);
+        });
       }
     }
 
@@ -233,19 +234,13 @@ function App() {
       setSession(newSession);
 
       if (newSession) {
-        setLoading(true);
-
-        setTimeout(async () => {
-          try {
-            await loadHomeData(newSession.user.id);
-            await loadNotifications(newSession.user.id);
-            await loadFollowing(newSession.user.id);
-          } catch (error) {
-            console.error("Loading user data:", error);
-          } finally {
-            if (mounted) setLoading(false);
-          }
-        }, 0);
+        Promise.all([
+          loadHomeData(newSession.user.id),
+          loadNotifications(newSession.user.id),
+          loadFollowing(newSession.user.id),
+        ]).catch((error) => {
+          console.error("Loading user data:", error);
+        });
       } else {
         setProfile(null);
         setPosts([]);
