@@ -1,861 +1,474 @@
-* {
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  color: #f5f7fc;
+  background: #07111f;
+}
+
+.nexora-auth-page,
+.nexora-auth-page * {
   box-sizing: border-box;
 }
 
-html,
-body,
-#root {
-  margin: 0;
-  min-height: 100%;
-}
-
 .nexora-auth-page {
+  --nx-bg: #07111f;
+  --nx-panel: #0c192a;
+  --nx-border: rgba(255,255,255,.1);
+  --nx-muted: #9aa9bd;
+  --nx-red: #e94343;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(390px, .86fr);
+  direction: rtl;
   min-height: 100vh;
-  width: 100%;
+  min-height: 100svh;
+  background: var(--nx-bg);
+  overflow: hidden;
+}
+
+.nexora-visual-side {
+  position: relative;
   display: flex;
-  overflow: hidden;
-  background: #071426;
-  font-family: Arial, Tahoma, sans-serif;
-}
-
-/* =========================
-   LEFT EGYPT SECTION
-========================= */
-
-.nexora-egypt-side {
-  width: 52%;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
   min-height: 100vh;
-  position: relative;
-  overflow: hidden;
-}
-
-.egypt-sky {
-  position: relative;
-  min-height: 100vh;
+  min-height: 100svh;
+  padding: 34px clamp(24px, 4vw, 62px) 26px;
   overflow: hidden;
   background:
-    radial-gradient(
-      circle at 55% 30%,
-      rgba(31, 142, 255, 0.4),
-      transparent 24%
-    ),
-    linear-gradient(
-      180deg,
-      #031a3c 0%,
-      #082d59 46%,
-      #0b3b68 65%,
-      #04182e 100%
-    );
+    radial-gradient(ellipse at 50% 55%, rgba(220,35,44,.12), transparent 42%),
+    linear-gradient(145deg, #10253a 0%, #091626 58%, #070e19 100%);
+  border-left: 1px solid var(--nx-border);
 }
 
-.egypt-glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(35px);
-  pointer-events: none;
-}
-
-.glow-one {
-  width: 330px;
-  height: 330px;
-  right: 8%;
-  top: 12%;
-  background: rgba(35, 156, 255, 0.2);
-}
-
-.glow-two {
-  width: 300px;
-  height: 300px;
-  left: 5%;
-  bottom: 5%;
-  background: rgba(255, 159, 67, 0.1);
-}
-
-/* Logo */
-
-.nexora-hero-brand {
-  position: absolute;
-  z-index: 8;
-  top: 9%;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-  width: 90%;
-}
-
-.hero-logo {
-  width: 150px;
-  height: 115px;
-  margin: 0 auto 8px;
-  position: relative;
+.nexora-top-brand,
+.mobile-brand {
   display: flex;
-  justify-content: center;
   align-items: center;
+  gap: 12px;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 2px;
 }
 
-.hero-logo span {
+.nexora-mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 14px;
+  background: linear-gradient(145deg, #172e47, #0a1422);
+  box-shadow: 0 8px 25px rgba(0,0,0,.22);
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -2px;
+}
+
+.nexora-mark span { color: #ed4545; }
+
+.egypt-art {
   position: relative;
-  z-index: 2;
-  font-size: 105px;
-  line-height: 1;
-  font-weight: 900;
-  font-style: italic;
-  color: #159cff;
-  text-shadow:
-    0 0 15px rgba(21, 156, 255, 0.5),
-    0 10px 30px rgba(0, 0, 0, 0.35);
-}
-
-.hero-logo i {
-  position: absolute;
-  width: 155px;
-  height: 35px;
-  border: 7px solid #f5f7fa;
-  border-left-color: #0792ff;
-  border-radius: 50%;
-  transform: rotate(-13deg);
-  top: 53px;
-  left: -3px;
-  z-index: 3;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
-}
-
-.nexora-hero-brand h1 {
-  margin: 0;
-  color: #fff;
-  font-size: clamp(45px, 5vw, 76px);
-  font-weight: 900;
-  letter-spacing: 4px;
-  text-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
-}
-
-.hero-tagline {
-  margin-top: 13px;
+  isolation: isolate;
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 17px;
-  color: #fff;
-  font-size: clamp(15px, 1.5vw, 23px);
-  letter-spacing: 1px;
+  justify-content: center;
+  flex: 1;
+  min-height: 450px;
 }
 
-.hero-tagline b {
-  color: #fff;
-}
-
-/* Cairo */
-
-.cairo-skyline {
+.egypt-sun {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 25%;
-  height: 28%;
-  opacity: 0.8;
+  top: 14%;
+  left: 20%;
+  width: clamp(130px, 17vw, 235px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(241,190,105,.2), rgba(241,190,105,.025) 65%, transparent 70%);
+  filter: blur(2px);
 }
 
-.building {
+.egypt-pyramid {
   position: absolute;
-  bottom: 0;
-  background: linear-gradient(
-    90deg,
-    #142f49,
-    #34556d,
-    #132b44
-  );
-  box-shadow: inset 0 0 20px rgba(255, 210, 100, 0.08);
+  bottom: 22%;
+  width: 0;
+  height: 0;
+  filter: drop-shadow(0 12px 28px rgba(0,0,0,.22));
 }
 
-.building-one {
-  width: 13%;
-  height: 55%;
-  left: 2%;
+.pyramid-back {
+  right: 13%;
+  border-left: clamp(65px, 9vw, 125px) solid transparent;
+  border-right: clamp(65px, 9vw, 125px) solid transparent;
+  border-bottom: clamp(120px, 17vw, 235px) solid #26384a;
+  opacity: .8;
 }
 
-.building-two {
-  width: 11%;
-  height: 72%;
-  left: 18%;
+.pyramid-front {
+  left: 13%;
+  border-left: clamp(75px, 11vw, 150px) solid transparent;
+  border-right: clamp(75px, 11vw, 150px) solid transparent;
+  border-bottom: clamp(145px, 20vw, 275px) solid #344456;
 }
 
-.building-three {
-  width: 15%;
-  height: 45%;
-  right: 2%;
-}
-
-.building-four {
-  width: 12%;
-  height: 67%;
-  right: 19%;
-}
-
-.building-five {
-  width: 17%;
-  height: 38%;
-  left: 39%;
-}
-
-.cairo-tower {
+.pyramid-front::after {
+  content: "";
   position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  height: 95%;
-  width: 95px;
-  z-index: 4;
+  top: 10px;
+  left: -1px;
+  width: 0;
+  height: 0;
+  border-left: clamp(37px, 5.5vw, 75px) solid transparent;
+  border-right: 0 solid transparent;
+  border-bottom: clamp(135px, 18vw, 250px) solid #1b2c3e;
 }
 
-.tower-top {
+.egypt-ground {
   position: absolute;
-  top: 0;
-  left: 50%;
-  width: 8px;
-  height: 13%;
-  transform: translateX(-50%);
-  background: #8ba2b5;
+  bottom: 20%;
+  left: -10%;
+  right: -10%;
+  height: 60px;
+  border-radius: 50%;
+  background: #0b1827;
+  filter: blur(12px);
 }
-
-.tower-body {
-  position: absolute;
-  top: 8%;
-  left: 50%;
-  width: 75px;
-  height: 78%;
-  transform: translateX(-50%);
-  background:
-    repeating-linear-gradient(
-      0deg,
-      rgba(255, 215, 130, 0.15) 0 4px,
-      transparent 4px 8px
-    ),
-    linear-gradient(
-      90deg,
-      #526d7d,
-      #b0a58a,
-      #566e7e
-    );
-  clip-path: polygon(
-    45% 0,
-    55% 0,
-    67% 100%,
-    33% 100%
-  );
-}
-
-.tower-base {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 95px;
-  height: 10%;
-  transform: translateX(-50%);
-  background: #3a5365;
-  clip-path: polygon(
-    28% 0,
-    72% 0,
-    100% 100%,
-    0 100%
-  );
-}
-
-/* Flag */
 
 .egypt-flag {
   position: absolute;
-  z-index: 6;
-  left: -8%;
-  bottom: 7%;
-  width: 92%;
-  height: 43%;
-  transform: rotate(-8deg);
-  border-radius: 4px 35px 15px 0;
+  z-index: 3;
+  top: 24%;
+  left: 50%;
+  width: clamp(118px, 15vw, 190px);
+  aspect-ratio: 3 / 2;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  box-shadow:
-    0 25px 50px rgba(0, 0, 0, 0.45),
-    inset 0 0 50px rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255,255,255,.45);
+  border-radius: 3px;
+  box-shadow: 0 15px 40px rgba(0,0,0,.38);
+  transform: translateX(-50%) rotate(-4deg);
 }
 
-.flag-red,
-.flag-white,
-.flag-black {
-  height: 33.333%;
-  width: 100%;
+.egypt-flag > span { flex: 1; }
+.flag-red { background: #ce2939; }
+.flag-white { display: grid; place-items: center; background: #fff; }
+.flag-white b { color: #c59a39; font-size: clamp(13px, 2vw, 23px); }
+.flag-black { background: #15191f; }
+
+.egypt-caption {
+  position: absolute;
+  z-index: 4;
+  bottom: 5%;
+  right: 0;
+  left: 0;
+  text-align: center;
 }
 
-.flag-red {
-  background:
-    linear-gradient(
-      120deg,
-      #a50000,
-      #ef1717 48%,
-      #990000
-    );
+.egypt-caption > span {
+  display: inline-block;
+  padding: 6px 15px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 30px;
+  background: rgba(255,255,255,.045);
+  color: #f0c27a;
+  font-size: 12px;
 }
 
-.flag-white {
-  position: relative;
-  background:
-    linear-gradient(
-      120deg,
-      #f4f4f2,
-      #fff 45%,
-      #d9d9d7
-    );
+.egypt-caption h1 {
+  margin: 14px 0 8px;
+  font-size: clamp(25px, 3vw, 42px);
+  line-height: 1.4;
+  font-weight: 900;
+}
+
+.egypt-caption h1 em { color: #f0c27a; font-style: normal; }
+.egypt-caption p { margin: 0; color: #a7b6c8; font-size: 13px; }
+
+.visual-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #8192a7;
+  font-size: 12px;
+}
+
+.visual-footer span:first-child { display: flex; align-items: center; gap: 8px; }
+.visual-footer i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #36c98f;
+  box-shadow: 0 0 12px rgba(54,201,143,.65);
+}
+
+.nexora-form-side {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.flag-white span {
-  font-size: 55px;
-  filter: sepia(1) saturate(2);
-  transform: rotate(8deg);
-}
-
-.flag-black {
+  min-width: 0;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 36px clamp(22px, 4vw, 64px);
   background:
-    linear-gradient(
-      120deg,
-      #050505,
-      #222 45%,
-      #000
-    );
+    radial-gradient(ellipse at 100% 0%, rgba(39,83,126,.12), transparent 50%),
+    #081321;
 }
 
-.egypt-wave {
-  position: absolute;
-  bottom: 0;
-  left: -10%;
-  width: 120%;
-  height: 23%;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(7, 30, 52, 0),
-      rgba(2, 11, 24, 0.88)
-    );
-  z-index: 7;
-  pointer-events: none;
-}
+.login-card { width: 100%; max-width: 430px; }
+.mobile-brand { display: none; }
 
-.hero-bottom-text {
-  position: absolute;
-  z-index: 9;
-  bottom: 5.5%;
-  left: 8%;
-  color: white;
-}
-
-.hero-bottom-text h2 {
-  margin: 0;
-  font-size: clamp(20px, 2.1vw, 32px);
-  font-weight: 500;
-}
-
-.hero-bottom-text div {
-  width: 70px;
-  height: 5px;
-  border-radius: 20px;
-  background: #168fff;
-  margin-top: 10px;
-  margin-right: auto;
-}
-
-.egypt-label {
-  position: absolute;
-  z-index: 10;
-  bottom: 3%;
-  right: 7%;
-  display: flex;
+.form-heading { margin-bottom: 25px; }
+.welcome-tag {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 12px;
+  color: #e7bd78;
   font-size: 12px;
+  font-weight: 700;
 }
-
-/* =========================
-   LOGIN SECTION
-========================= */
-
-.nexora-login-side {
-  width: 48%;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 35px;
-  position: relative;
-  background:
-    radial-gradient(
-      circle at 50% 20%,
-      rgba(20, 76, 143, 0.16),
-      transparent 35%
-    ),
-    #071322;
-}
-
-.login-card {
-  width: min(100%, 580px);
-  max-height: calc(100vh - 50px);
-  overflow-y: auto;
-  padding: 30px 38px;
-  border: 1px solid rgba(73, 133, 207, 0.42);
-  border-radius: 23px;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(10, 27, 48, 0.98),
-      rgba(5, 17, 31, 0.98)
-    );
-  box-shadow:
-    0 30px 80px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.035);
-}
-
-.login-card::-webkit-scrollbar {
-  width: 4px;
-}
-
-.login-card::-webkit-scrollbar-thumb {
-  background: #166ed4;
-  border-radius: 10px;
-}
-
-.mobile-brand {
-  display: none;
-}
-
-/* Login logo */
-
-.login-brand {
-  text-align: center;
-  margin-bottom: 23px;
-}
-
-.login-logo {
-  position: relative;
-  width: 80px;
-  height: 70px;
-  margin: 0 auto 2px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.login-logo span {
-  font-size: 65px;
-  font-weight: 900;
-  font-style: italic;
-  color: #149bff;
-  line-height: 1;
-}
-
-.login-logo i {
-  position: absolute;
-  width: 84px;
-  height: 19px;
-  border: 4px solid white;
-  border-left-color: #008cff;
+.welcome-tag span {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  transform: rotate(-12deg);
-  top: 36px;
+  background: #e94343;
+  box-shadow: 0 0 10px rgba(233,67,67,.6);
 }
+.form-heading h2 { margin: 0 0 8px; font-size: clamp(27px, 3vw, 34px); font-weight: 900; }
+.form-heading p { margin: 0; color: var(--nx-muted); font-size: 13px; line-height: 1.9; }
 
-.login-brand h2 {
-  margin: 0;
-  color: white;
-  font-size: 40px;
-  letter-spacing: 2px;
-  font-weight: 900;
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  padding: 5px;
+  margin-bottom: 23px;
+  border: 1px solid var(--nx-border);
+  border-radius: 13px;
+  background: rgba(255,255,255,.025);
 }
-
-.login-brand h3 {
-  margin: 12px 0 8px;
-  color: #fff;
-  font-size: 23px;
-}
-
-.login-brand p {
-  margin: 0 auto;
-  max-width: 390px;
-  color: #91a3b9;
+.auth-tabs button {
+  min-height: 43px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #9aabc0;
+  font: inherit;
   font-size: 13px;
-  line-height: 1.8;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .2s ease;
+}
+.auth-tabs button.active {
+  background: #172a40;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.07);
 }
 
-/* Form */
-
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.input-group label {
-  color: #a9b9cc;
-  font-size: 12px;
-}
+.login-form { display: flex; flex-direction: column; gap: 17px; }
+.input-group { display: flex; flex-direction: column; gap: 8px; }
+.input-group label { color: #dce4ee; font-size: 12px; font-weight: 700; }
 
 .input-wrapper {
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 52px;
+  padding: 0 14px;
+  border: 1px solid #26374b;
+  border-radius: 11px;
+  background: #0c1a2b;
+  transition: border-color .2s, box-shadow .2s;
 }
-
+.input-wrapper:focus-within {
+  border-color: #c64a50;
+  box-shadow: 0 0 0 3px rgba(233,67,67,.09);
+}
+.field-symbol { color: #8398af; font-size: 18px; }
 .input-wrapper input {
-  width: 100%;
-  height: 53px;
-  border: 1px solid #294a70;
-  border-radius: 15px;
-  padding: 0 48px 0 48px;
-  outline: none;
-  background: rgba(4, 17, 31, 0.65);
-  color: white;
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  padding: 13px 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #f7f9fc;
+  font: inherit;
   font-size: 13px;
-  transition: 0.2s;
-  direction: rtl;
 }
-
-.input-wrapper input::placeholder {
-  color: #70849c;
-}
-
-.input-wrapper input:focus {
-  border-color: #168fff;
-  box-shadow: 0 0 0 3px rgba(22, 143, 255, 0.1);
-}
-
-.input-icon {
-  position: absolute;
-  right: 17px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #b8cae0;
-  font-size: 19px;
-  z-index: 2;
-}
-
+.input-wrapper input::placeholder { color: #65778d; }
 .eye-button {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  border: none;
+  padding: 5px;
+  border: 0;
   background: transparent;
-  color: #a8bbd2;
+  color: #d4b47d;
+  font: inherit;
+  font-size: 11px;
   cursor: pointer;
-  font-size: 20px;
 }
 
+.forgot-row { display: flex; justify-content: flex-start; margin-top: -7px; }
 .forgot-button {
-  align-self: flex-start;
-  border: none;
-  background: transparent;
-  color: #078cff;
-  cursor: pointer;
-  font-size: 12px;
   padding: 0;
+  border: 0;
+  background: transparent;
+  color: #e6b76d;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
 }
+.forgot-button:disabled { opacity: .5; cursor: wait; }
 
 .login-message {
-  padding: 10px 13px;
-  border-radius: 10px;
-  border: 1px solid rgba(22, 143, 255, 0.35);
-  background: rgba(22, 143, 255, 0.08);
-  color: #b8dfff;
-  text-align: center;
+  padding: 11px 13px;
+  border: 1px solid rgba(220,170,90,.25);
+  border-radius: 9px;
+  background: rgba(220,170,90,.07);
+  color: #f1d5a4;
   font-size: 12px;
-  line-height: 1.6;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
 }
 
 .login-main-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   width: 100%;
-  height: 55px;
-  border: none;
-  border-radius: 28px;
-  background: linear-gradient(
-    100deg,
-    #087df5,
-    #168fff
-  );
-  color: white;
-  cursor: pointer;
-  font-size: 15px;
+  min-height: 51px;
+  margin-top: 1px;
+  padding: 0 17px;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 11px;
+  background: linear-gradient(105deg, #d63240, #a91f35);
+  box-shadow: 0 9px 25px rgba(188,35,55,.19);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
   font-weight: 800;
-  box-shadow:
-    0 12px 30px rgba(8, 125, 245, 0.25);
-  transition: 0.2s;
+  cursor: pointer;
+  transition: transform .2s, filter .2s;
 }
-
-.login-main-button:hover {
-  transform: translateY(-1px);
-  box-shadow:
-    0 15px 35px rgba(8, 125, 245, 0.34);
-}
-
-.login-main-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.login-main-button span {
-  display: inline-block;
-  margin-right: 10px;
-  font-size: 21px;
-  vertical-align: -1px;
-}
-
-/* Divider */
+.login-main-button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.login-main-button:disabled { opacity: .65; cursor: wait; transform: none; }
+.submit-arrow { font-size: 20px; }
 
 .or-divider {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 18px 0;
-  color: #778ba3;
-  font-size: 12px;
+  margin: 23px 0 17px;
+  color: #788ba1;
+  font-size: 11px;
 }
-
-.or-divider span {
-  height: 1px;
-  flex: 1;
-  background: #263d58;
-}
-
-.or-divider b {
-  font-weight: 400;
-}
-
-/* Google */
+.or-divider span { flex: 1; height: 1px; background: #243448; }
 
 .google-button {
-  width: 100%;
-  height: 51px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 11px;
-  border: 1px solid #087df5;
-  border-radius: 27px;
-  background: transparent;
-  color: #128fff;
-  cursor: pointer;
-  font-size: 13px;
+  width: 100%;
+  min-height: 49px;
+  border: 1px solid #2b3b4f;
+  border-radius: 11px;
+  background: rgba(255,255,255,.025);
+  color: #e1e8f1;
+  font: inherit;
+  font-size: 12px;
   font-weight: 700;
-  transition: 0.2s;
+  cursor: pointer;
+  transition: background .2s;
 }
-
-.google-button:hover {
-  background: rgba(8, 125, 245, 0.08);
-}
-
-.google-icon {
-  width: 23px;
-  height: 23px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: white;
-  color: #4285f4;
-  font-size: 16px;
-  font-weight: 900;
-}
-
-/* Switch */
+.google-button:hover { background: rgba(255,255,255,.06); }
+.google-icon { color: #fff; font-family: Arial, sans-serif; font-size: 19px; font-weight: 900; }
 
 .switch-account {
-  margin-top: 22px;
-  display: flex;
-  justify-content: center;
-  gap: 7px;
-  color: #8395aa;
+  margin: 23px 0 0;
+  color: #a4b2c3;
+  text-align: center;
   font-size: 12px;
 }
-
 .switch-account button {
-  border: none;
+  border: 0;
   background: transparent;
-  color: #0b91ff;
-  cursor: pointer;
+  color: #e8bd7b;
+  font: inherit;
   font-weight: 800;
-  font-size: 12px;
+  cursor: pointer;
 }
-
-/* Language */
-
-.language-selector {
-  margin: 21px auto 0;
-  width: fit-content;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #a5b5c8;
-  font-size: 12px;
-}
-
-.arrow-down {
-  color: #72869e;
-  font-size: 17px;
-}
-
-/* Footer */
-
-.login-footer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 7px;
-  margin-top: 18px;
-  padding-top: 15px;
-  border-top: 1px solid rgba(53, 77, 104, 0.45);
-  color: #536b86;
+.form-legal {
+  margin-top: 24px;
+  padding-top: 17px;
+  border-top: 1px solid rgba(255,255,255,.07);
+  color: #667990;
+  text-align: center;
   font-size: 10px;
+  line-height: 1.8;
 }
 
-.login-footer span:first-child {
-  color: #128fff;
-  font-weight: 900;
+@media (max-width: 850px) {
+  .nexora-auth-page { grid-template-columns: minmax(0, 1fr) minmax(340px, .95fr); }
+  .nexora-visual-side { padding: 25px 22px 20px; }
+  .nexora-form-side { padding: 28px 22px; }
+  .egypt-caption h1 { font-size: 27px; }
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media (max-width: 1000px) {
-  .nexora-egypt-side {
-    width: 46%;
-  }
-
-  .nexora-login-side {
-    width: 54%;
-    padding: 20px;
-  }
-
-  .login-card {
-    padding: 25px;
-  }
-
-  .nexora-hero-brand h1 {
-    font-size: 48px;
-  }
-
-  .hero-logo {
-    transform: scale(0.8);
-  }
-
-  .hero-tagline {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 760px) {
+@media (max-width: 680px) {
   .nexora-auth-page {
-    display: block;
-    overflow-y: auto;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: visible;
   }
-
-  .nexora-egypt-side {
-    width: 100%;
-    min-height: 260px;
-    height: 260px;
+  .nexora-visual-side {
+    min-height: 0;
+    height: 290px;
+    padding: 18px 20px 15px;
+    border-left: 0;
+    border-bottom: 1px solid var(--nx-border);
   }
-
-  .egypt-sky {
-    min-height: 260px;
-  }
-
-  .nexora-hero-brand {
-    top: 10px;
-  }
-
-  .hero-logo {
-    width: 80px;
-    height: 60px;
-    transform: scale(0.55);
-    margin-bottom: -10px;
-  }
-
-  .nexora-hero-brand h1 {
-    font-size: 39px;
-  }
-
-  .hero-tagline {
-    margin-top: 2px;
-    font-size: 12px;
-    gap: 8px;
-  }
-
-  .cairo-skyline {
-    bottom: 0;
-    height: 35%;
-  }
-
-  .egypt-flag {
-    width: 70%;
-    height: 40%;
-    left: -13%;
-    bottom: -3%;
-    opacity: 0.75;
-  }
-
-  .hero-bottom-text {
-    display: none;
-  }
-
-  .egypt-label {
-    bottom: 8px;
-  }
-
-  .nexora-login-side {
-    width: 100%;
-    min-height: calc(100vh - 260px);
-    padding: 18px 13px 30px;
-    align-items: flex-start;
-  }
-
-  .login-card {
-    width: 100%;
-    max-height: none;
-    padding: 25px 19px;
-    border-radius: 20px;
-  }
+  .nexora-top-brand { font-size: 16px; }
+  .nexora-mark { width: 36px; height: 36px; border-radius: 11px; font-size: 21px; }
+  .egypt-art { min-height: 0; }
+  .egypt-sun { top: 0; left: 15%; width: 125px; }
+  .pyramid-back { right: 14%; border-left-width: 60px; border-right-width: 60px; border-bottom-width: 105px; }
+  .pyramid-front { left: 13%; border-left-width: 68px; border-right-width: 68px; border-bottom-width: 125px; }
+  .pyramid-front::after { border-left-width: 34px; border-bottom-width: 115px; }
+  .egypt-flag { top: 10%; width: 105px; }
+  .egypt-caption { bottom: 0; }
+  .egypt-caption > span { padding: 4px 10px; font-size: 10px; }
+  .egypt-caption h1 { margin: 5px 0 2px; font-size: 21px; }
+  .egypt-caption p { font-size: 10px; }
+  .visual-footer { font-size: 10px; }
+  .nexora-form-side { min-height: auto; padding: 28px 20px 25px; }
+  .login-card { max-width: 460px; }
+  .mobile-brand { display: flex; margin-bottom: 23px; font-size: 16px; }
+  .form-heading { margin-bottom: 20px; }
+  .form-heading h2 { font-size: 27px; }
 }
 
-@media (max-width: 430px) {
-  .nexora-egypt-side {
-    min-height: 225px;
-    height: 225px;
-  }
+@media (max-width: 360px) {
+  .nexora-visual-side { height: 265px; padding-inline: 15px; }
+  .nexora-form-side { padding-inline: 15px; }
+  .input-wrapper { padding-inline: 10px; }
+}
+/* NEXORA brand color fix */
+.nexora-top-brand,
+.mobile-brand {
+  color: #f0c27a !important;
+  text-shadow: 0 0 12px rgba(240, 194, 122, 0.25);
+}
 
-  .egypt-sky {
-    min-height: 225px;
-  }
+.nexora-mark {
+  color: #f0c27a !important;
+  border-color: rgba(240, 194, 122, 0.65);
+  background: linear-gradient(145deg, #243b55, #101b2b);
+  box-shadow: 0 0 18px rgba(240, 194, 122, 0.2);
+}
 
-  .nexora-hero-brand h1 {
-    font-size: 34px;
-  }
-
-  .hero-tagline {
-    font-size: 10px;
-  }
-
-  .login-brand h2 {
-    font-size: 34px;
-  }
-
-  .login-brand h3 {
-    font-size: 20px;
-  }
-
-  .login-brand p {
-    font-size: 11px;
-  }
+.nexora-mark span {
+  color: #ff5555 !important;
 }
