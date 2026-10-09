@@ -229,7 +229,6 @@ function App() {
     } = supabase.auth.onAuthStateChange((event, newSession) => {
       if (!mounted) return;
 
-      if (event === "INITIAL_SESSION") return;
 
       setSession(newSession);
 
