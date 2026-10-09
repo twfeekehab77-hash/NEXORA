@@ -225,7 +225,7 @@ function App() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+    } = supabase.auth.onAuthStateChange((event, newSession) => {
       if (!mounted) return;
 
       if (event === "INITIAL_SESSION") return;
@@ -235,13 +235,17 @@ function App() {
       if (newSession) {
         setLoading(true);
 
-        await loadHomeData(newSession.user.id);
-        await loadNotifications(newSession.user.id);
-        await loadFollowing(newSession.user.id);
-
-        if (mounted) {
-          setLoading(false);
-        }
+        setTimeout(async () => {
+          try {
+            await loadHomeData(newSession.user.id);
+            await loadNotifications(newSession.user.id);
+            await loadFollowing(newSession.user.id);
+          } catch (error) {
+            console.error("Loading user data:", error);
+          } finally {
+            if (mounted) setLoading(false);
+          }
+        }, 0);
       } else {
         setProfile(null);
         setPosts([]);
