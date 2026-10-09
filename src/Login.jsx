@@ -251,7 +251,14 @@ export default function Login() {
           <button
             type="button"
             className="google-button"
-            onClick={() => setMessage("لتفعيل Google، افتح Supabase ثم Authentication ثم Sign In / Providers وفعّل Google.")}
+            onClick={async () => {
+              setMessage("");
+              const { error } = await supabase.auth.signInWithOAuth({
+                provider: "google",
+                options: { redirectTo: window.location.origin },
+              });
+              if (error) setMessage(error.message);
+            }}
           >
             <span className="google-icon">G</span>
             <span>المتابعة باستخدام Google</span>
