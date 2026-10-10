@@ -163,6 +163,16 @@ function App() {
   const [selectedUserFollowers, setSelectedUserFollowers] = useState(0);
   const [selectedUserFollowing, setSelectedUserFollowing] = useState(0);
   const [userProfileLoading, setUserProfileLoading] = useState(false);
+  const [profileTab, setProfileTab] = useState("posts");
+
+  const visibleProfilePosts =
+    profileTab === "posts"
+      ? selectedUserPosts
+      : selectedUserPosts.filter((post) =>
+          profileTab === "reels"
+            ? post.media_type === "video"
+            : post.media_type === "image"
+        );
 
   const [loading, setLoading] = useState(true);
   const [active, setActive] = useState("Home");
@@ -2259,19 +2269,64 @@ function App() {
                 </div>
 
                 <div className="profile-posts-card">
-                  <div className="profile-tabs">
-                    <div className="profile-tab active">Posts</div>
+                  <div
+                    className="profile-tabs"
+                    role="tablist"
+                    aria-label="Profile content"
+                    style={{ display: "flex", gap: "8px", padding: "0 18px", overflowX: "auto" }}
+                  >
+                    {[
+                      { id: "posts", label: "Posts" },
+                      { id: "reels", label: "Reels ▶" },
+                      { id: "photos", label: "Photos ▧" }
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={profileTab === tab.id}
+                        className={`profile-tab${profileTab === tab.id ? " active" : ""}`}
+                        onClick={() => setProfileTab(tab.id)}
+                        style={{
+                          flex: "0 0 auto",
+                          padding: "0 14px",
+                          border: 0,
+                          borderBottom: profileTab === tab.id
+                            ? "3px solid #17181c"
+                            : "3px solid transparent",
+                          background: "transparent",
+                          cursor: "pointer",
+                          font: "inherit",
+                          fontWeight: 750,
+                          color: profileTab === tab.id ? "#17181c" : "#858891"
+                        }}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
                   </div>
 
-                  {selectedUserPosts.length === 0 ? (
+                  {visibleProfilePosts.length === 0 ? (
                     <div className="profile-empty">
                       <div className="profile-empty-icon"><NIcon name="Profile" size={28} /></div>
-                      <h3>No posts yet</h3>
-                      <p>When this user publishes something, it will appear here.</p>
+                      <h3>
+                        {profileTab === "reels"
+                          ? "No videos yet"
+                          : profileTab === "photos"
+                            ? "No photos yet"
+                            : "No posts yet"}
+                      </h3>
+                      <p>
+                        {profileTab === "posts"
+                          ? "When this user publishes something, it will appear here."
+                          : profileTab === "reels"
+                            ? "Videos shared by this user will appear here."
+                            : "Photos shared by this user will appear here."}
+                      </p>
                     </div>
                   ) : (
                     <div className="profile-post-grid">
-                      {selectedUserPosts.map((post) => (
+                      {visibleProfilePosts.map((post) => (
                         <article key={post.id} className="profile-post-item">
                           {post.media_url ? (
                             post.media_type === "video" ? (
@@ -2283,6 +2338,26 @@ function App() {
                             <div className="profile-text-post">
                               <span>{post.content}</span>
                             </div>
+                          )}
+                          {post.media_type === "video" && (
+                            <span
+                              aria-label="Video"
+                              title="Video"
+                              style={{
+                                position: "absolute",
+                                top: "8px",
+                                right: "8px",
+                                padding: "5px 8px",
+                                borderRadius: "8px",
+                                background: "rgba(0,0,0,.72)",
+                                color: "#fff",
+                                fontSize: "11px",
+                                fontWeight: 800,
+                                pointerEvents: "none"
+                              }}
+                            >
+                              ▶ VIDEO
+                            </span>
                           )}
                           <div className="profile-post-overlay">
                             <span>{new Date(post.created_at).toLocaleDateString()}</span>
