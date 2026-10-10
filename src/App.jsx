@@ -129,6 +129,8 @@ function App() {
   const [profile, setProfile] = useState(null);
 
   const [posts, setPosts] = useState([]);
+  const [postsHasMore, setPostsHasMore] = useState(false);
+  const [postsLoadingMore, setPostsLoadingMore] = useState(false);
   const [stories, setStories] = useState([]);
   const [likes, setLikes] = useState({});
   const [openReactionPost, setOpenReactionPost] = useState(null);
@@ -915,32 +917,47 @@ async function blockUser(userId, reason = "Blocked by user") {
     setUserProfileLoading(false);
   }
 
-  async function loadPosts(userId) {
-    const { data, error } = await supabase
+  const POSTS_PAGE_SIZE = 10;
+
+  async function loadPosts(userId, cursor = null, append = false) {
+    let query = supabase
       .from("posts")
       .select("id,user_id,content,created_at,media_url,media_type")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(POSTS_PAGE_SIZE);
+
+    if (cursor?.created_at && cursor?.id) {
+      query = query.or(
+        `created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`
+      );
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Posts:", error);
-      return;
+      return false;
     }
 
     const postData = data || [];
 
-    setPosts(postData);
+    setPosts((previous) => {
+      if (!append) return postData;
+
+      const existingIds = new Set(previous.map((post) => post.id));
+      const newPosts = postData.filter((post) => !existingIds.has(post.id));
+
+      return [...previous, ...newPosts];
+    });
+    setPostsHasMore(postData.length === POSTS_PAGE_SIZE);
 
     const userIds = [
-      ...new Set(
-        postData.map((post) => post.user_id).filter(Boolean)
-      ),
+      ...new Set(postData.map((post) => post.user_id).filter(Boolean)),
     ];
 
     if (userIds.length > 0) {
-      const {
-        data: profilesData,
-        error: profilesError,
-      } = await supabase
+      const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
         .select("id,username,full_name,avatar_url,is_owner,heart_badge,verified_badge")
         .in("id", userIds);
@@ -949,21 +966,37 @@ async function blockUser(userId, reason = "Blocked by user") {
         console.error("Post profiles:", profilesError);
       } else {
         const profileData = {};
-
         (profilesData || []).forEach((user) => {
           profileData[user.id] = user;
         });
-
-        setPostProfiles(profileData);
+        setPostProfiles((previous) =>
+          append ? { ...previous, ...profileData } : profileData
+        );
       }
-    } else {
+    } else if (!append) {
       setPostProfiles({});
     }
 
-    await Promise.all([
-      loadLikes(userId),
-      loadComments(),
-    ]);
+    if (!append) {
+      await Promise.all([loadLikes(userId), loadComments()]);
+    }
+
+    return true;
+  }
+
+  async function loadMorePosts() {
+    if (postsLoadingMore || !postsHasMore || !session || posts.length === 0) {
+      return;
+    }
+
+    const cursor = posts[posts.length - 1];
+    setPostsLoadingMore(true);
+
+    try {
+      await loadPosts(session.user.id, cursor, true);
+    } finally {
+      setPostsLoadingMore(false);
+    }
   }
 
   async function loadLikes(userId) {
@@ -4052,6 +4085,18 @@ async function blockUser(userId, reason = "Blocked by user") {
                 })
               )}
             </section>
+            {postsHasMore && (
+              <div style={{ display: "flex", justifyContent: "center", padding: "16px" }}>
+                <button
+                  type="button"
+                  className="primary-btn"
+                  onClick={loadMorePosts}
+                  disabled={postsLoadingMore}
+                >
+                  {postsLoadingMore ? "Loading..." : "Load More Posts"}
+                </button>
+              </div>
+            )}
               </div>
 
               <aside className="fb-home-right">
