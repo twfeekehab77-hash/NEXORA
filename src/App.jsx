@@ -2100,7 +2100,17 @@ async function blockUser(userId, reason = "Blocked by user") {
         .fb-right-footer{font-size:11px;color:#65676b;line-height:1.6;padding:2px 8px;}
         @media(max-width:1200px){.fb-home-layout{grid-template-columns:minmax(0,820px);max-width:850px}.fb-home-right{display:none;}}
         @media(max-width:760px){.content{padding-left:10px;padding-right:10px}.fb-home-card{padding:16px}.fb-story{width:100px;min-width:100px}.fb-story-bg{height:155px}.fb-home-layout{display:block;padding:0 0 28px}.fb-mobile-page-title{display:flex;align-items:center;justify-content:space-between;padding:4px 2px 12px;color:#1c1e21}.fb-mobile-page-title strong{font-size:20px;letter-spacing:-.03em}.fb-mobile-page-title span{font-size:14px;color:#65676b}.fb-home-main{width:100%;}}
-      `}</style>
+
+        .nexora-top-nav{display:flex;align-items:stretch;justify-content:center;gap:6px;max-width:1280px;margin:0 auto 14px;padding:6px 12px;background:rgba(255,255,255,.97);border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 5px 20px rgba(20,20,40,.06);overflow-x:auto;scrollbar-width:thin;}
+        .nexora-top-nav-item{position:relative;flex:1;min-width:76px;max-width:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:58px;padding:6px 8px;border:0;border-radius:10px;background:transparent;color:#656873;cursor:pointer;font:inherit;transition:background .15s,color .15s;}
+        .nexora-top-nav-item:hover{background:#f3f4f6;color:#17181c;}
+        .nexora-top-nav-item.active{color:#1877f2;background:#eef5ff;}
+        .nexora-top-nav-item.active::after{content:"";position:absolute;bottom:0;left:12px;right:12px;height:3px;border-radius:3px;background:#1877f2;}
+        .nexora-top-nav-icon{position:relative;display:grid;place-items:center;}
+        .nexora-top-nav-label{font-size:12px;font-weight:650;white-space:nowrap;}
+        .nexora-top-nav-badge{position:absolute;top:2px;right:calc(50% - 25px);min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+        @media(max-width:760px){.nexora-top-nav{justify-content:flex-start;gap:4px;margin:0 -10px 10px;padding:4px 8px;border-radius:0;border-left:0;border-right:0;}.nexora-top-nav-item{flex:0 0 72px;min-width:72px;min-height:54px;padding:5px 4px;}.nexora-top-nav-label{font-size:10px;}.nexora-top-nav-item.active::after{left:10px;right:10px;}}
+`}</style>
       <aside className="sidebar">
         <div className="logo">NEXORA</div>
 
@@ -2476,6 +2486,37 @@ async function blockUser(userId, reason = "Blocked by user") {
             )}
           </div>
         </header>
+
+        <nav className="nexora-top-nav" aria-label="Main navigation">
+          {menu.map((item) => (
+            <button
+              key={`top-${item.key}`}
+              type="button"
+              title={item.name}
+              className={active === item.key ? "nexora-top-nav-item active" : "nexora-top-nav-item"}
+              onClick={() => {
+                if (item.key === "Notifications") {
+                  openNotifications();
+                  return;
+                }
+                setActive(item.key);
+                if (item.key !== "Profile") setSelectedUserProfile(null);
+                setShowProfile(item.key === "Profile");
+                if (item.key === "Messages" || item.key === "Home") loadUsers();
+              }}
+            >
+              <span className="nexora-top-nav-icon">
+                <NIcon name={item.icon} size={22} />
+              </span>
+              <span className="nexora-top-nav-label">{item.name}</span>
+              {item.key === "Notifications" && unreadNotifications > 0 && (
+                <span className="nexora-top-nav-badge">
+                  {unreadNotifications > 99 ? "99+" : unreadNotifications}
+                </span>
+              )}
+            </button>
+          ))}
+        </nav>
 
         {selectedUserProfile ? (
           <section className="public-profile-page">
