@@ -2104,12 +2104,9 @@ async function blockUser(userId, reason = "Blocked by user") {
         .nexora-top-nav{display:flex;align-items:stretch;justify-content:center;gap:6px;max-width:1280px;margin:0 auto 14px;padding:6px 12px;background:rgba(255,255,255,.97);border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 5px 20px rgba(20,20,40,.06);overflow-x:auto;scrollbar-width:thin;}
         .nexora-top-nav-item{position:relative;flex:1;min-width:76px;max-width:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:58px;padding:6px 8px;border:0;border-radius:10px;background:transparent;color:#656873;cursor:pointer;font:inherit;transition:background .15s,color .15s;}
         .nexora-top-nav-item:hover{background:#f3f4f6;color:#17181c;}
-        .nexora-top-nav-item.active{color:#1877f2;background:#eef5ff;}
-        .nexora-top-nav-item.active::after{content:"";position:absolute;bottom:0;left:12px;right:12px;height:3px;border-radius:3px;background:#1877f2;}
         .nexora-top-nav-icon{position:relative;display:grid;place-items:center;}
         .nexora-top-nav-label{font-size:12px;font-weight:650;white-space:nowrap;}
         .nexora-top-nav-badge{position:absolute;top:2px;right:calc(50% - 25px);min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;}
-        @media(max-width:760px){.nexora-top-nav{justify-content:flex-start;gap:4px;margin:0 -10px 10px;padding:4px 8px;border-radius:0;border-left:0;border-right:0;}.nexora-top-nav-item{flex:0 0 72px;min-width:72px;min-height:54px;padding:5px 4px;}.nexora-top-nav-label{font-size:10px;}.nexora-top-nav-item.active::after{left:10px;right:10px;}}
 `}</style>
       <aside className="sidebar">
         <div className="logo">NEXORA</div>
