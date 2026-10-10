@@ -164,6 +164,10 @@ function App() {
   const [searchLoading, setSearchLoading] = useState(false);
 
   const [selectedUserProfile, setSelectedUserProfile] = useState(null);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("Spam");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reportSubmitting, setReportSubmitting] = useState(false);
   const [selectedUserPosts, setSelectedUserPosts] = useState([]);
   const [selectedUserFollowers, setSelectedUserFollowers] = useState(0);
   const [selectedUserFollowing, setSelectedUserFollowing] = useState(0);
@@ -367,11 +371,15 @@ async function blockUser(userId, reason = "Blocked by user") {
 
     if (error) {
       console.error("Report user:", error);
+      setReportSubmitting(false);
       setSaveMessage("Report failed: " + error.message);
       return;
     }
 
     console.log("Report created:", data);
+    setReportSubmitting(false);
+    setReportModalOpen(false);
+    setReportDetails("");
     setSaveMessage("Report submitted successfully.");
   }
 
@@ -2468,7 +2476,9 @@ async function blockUser(userId, reason = "Blocked by user") {
                                   type="button"
                                   onClick={(e) => {
                                     e.currentTarget.closest("details")?.removeAttribute("open");
-                                    reportUser(selectedUserProfile.id);
+                                    setReportReason("Spam");
+                                    setReportDetails("");
+                                    setReportModalOpen(true);
                                   }}
                                   style={{
                                     display: "block",
@@ -4087,6 +4097,28 @@ async function blockUser(userId, reason = "Blocked by user") {
             </div>
           </div>
         )}
+      {reportModalOpen && selectedUserProfile && (
+        <div role="presentation" onClick={() => !reportSubmitting && setReportModalOpen(false)} style={{position:"fixed",inset:0,zIndex:10000,background:"rgba(0,0,0,.58)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+          <section role="dialog" aria-modal="true" aria-labelledby="report-dialog-title" onClick={(e) => e.stopPropagation()} style={{width:"100%",maxWidth:480,maxHeight:"90vh",overflowY:"auto",background:"var(--card-bg, #fff)",color:"var(--text-color, #222)",borderRadius:16,padding:22,boxShadow:"0 18px 60px rgba(0,0,0,.25)"}}>
+            <h2 id="report-dialog-title" style={{marginTop:0}}>⚠️ Report user</h2>
+            <p>Why are you reporting this account?</p>
+            <form onSubmit={async (e) => { e.preventDefault(); if (!reportReason || reportSubmitting) return; setReportSubmitting(true); await reportUser(selectedUserProfile.id, reportReason, reportDetails.trim()); }}>
+              {["Spam", "Fake account or impersonation", "Harassment or bullying", "Hate speech", "Violence or threats", "Nudity or sexual content", "Scam or fraud", "Other"].map((reason) => (
+                <label key={reason} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",cursor:"pointer"}}>
+                  <input type="radio" name="report-reason" value={reason} checked={reportReason === reason} onChange={() => setReportReason(reason)} />
+                  <span>{({"Spam":"Spam or unwanted content","Fake account or impersonation":"Fake account or impersonation","Harassment or bullying":"Harassment or bullying","Hate speech":"Hate speech","Violence or threats":"Violence or threats","Nudity or sexual content":"Nudity or sexual content","Scam or fraud":"Scam or fraud","Other":"Other"})[reason]}</span>
+                </label>
+              ))}
+              <label htmlFor="report-details" style={{display:"block",fontWeight:600,marginTop:12}}>Additional details (optional)</label>
+              <textarea id="report-details" value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} maxLength={2000} placeholder="Tell us more about what happened..." rows={4} style={{boxSizing:"border-box",width:"100%",marginTop:8,padding:11,borderRadius:9,border:"1px solid rgba(127,127,127,.4)",background:"transparent",color:"inherit",font:"inherit",resize:"vertical"}} />
+              <div style={{display:"flex",justifyContent:"flex-end",gap:10,marginTop:16}}>
+                <button type="button" disabled={reportSubmitting} onClick={() => setReportModalOpen(false)} style={{padding:"10px 15px",border:0,borderRadius:8,cursor:"pointer"}}>Cancel</button>
+                <button type="submit" disabled={reportSubmitting} style={{padding:"10px 16px",border:0,borderRadius:8,background:"#1877f2",color:"white",fontWeight:700,cursor:"pointer"}}>{reportSubmitting ? "Sending..." : "Submit report"}</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
       </main>
     </div>
   );
