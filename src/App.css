@@ -247,3 +247,224 @@ nav {
     display: none;
   }
 }
+/* NEXORA responsive visual polish */
+#root {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+  text-align: left !important;
+}
+
+.nexora {
+  width: 100%;
+  min-height: 100vh;
+  background: #f5f6fa !important;
+  color: #17181c;
+}
+
+.content {
+  min-width: 0;
+  max-width: none !important;
+}
+
+.fb-home-layout {
+  width: 100%;
+  max-width: 1320px !important;
+  margin-inline: auto !important;
+  gap: 22px !important;
+}
+
+.fb-home-card,
+.fb-stories-card,
+.post,
+.fb-right-card {
+  border: 1px solid #e7e9f0 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 5px 24px rgba(22, 27, 45, 0.045) !important;
+}
+
+.fb-home-card {
+  margin-bottom: 18px !important;
+}
+
+.fb-stories-row {
+  gap: 12px !important;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.fb-story {
+  flex: 0 0 132px;
+  transition: transform .18s ease;
+}
+
+.fb-story:hover {
+  transform: translateY(-2px);
+}
+
+.fb-story-bg {
+  border-radius: 15px !important;
+}
+
+.fb-publish {
+  border-radius: 12px !important;
+  font-weight: 750;
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.post {
+  min-width: 0;
+  padding: 20px !important;
+  overflow-wrap: anywhere;
+}
+
+.post > p {
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.post-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 4px;
+}
+
+.post-actions button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+.fb-home-right {
+  min-width: 0;
+}
+
+@media (max-width: 1200px) {
+  .fb-home-layout {
+    max-width: 860px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .sidebar {
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: calc(62px + env(safe-area-inset-bottom, 0px)) !important;
+    min-height: 0 !important;
+    padding: 5px 8px env(safe-area-inset-bottom, 0px) !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    border-right: 0 !important;
+    border-top: 1px solid #e6e8ef !important;
+    box-shadow: 0 -6px 24px rgba(20, 24, 40, .08) !important;
+    z-index: 1000;
+    background: rgba(255, 255, 255, .97) !important;
+    backdrop-filter: blur(14px);
+  }
+
+  .sidebar > .logo,
+  .sidebar > .create-btn,
+  .sidebar > .developer-card,
+  .sidebar > .profile-mini {
+    display: none !important;
+  }
+
+  .sidebar nav {
+    width: 100%;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-around;
+    gap: 3px;
+    margin: 0 !important;
+  }
+
+  .sidebar nav .menu {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 46px;
+    margin: 0 !important;
+    padding: 7px 3px !important;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px !important;
+    border-radius: 12px !important;
+    font-size: 10px !important;
+    transform: none !important;
+  }
+
+  .sidebar nav .menu .nav-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .sidebar nav .menu .nav-label {
+    display: block !important;
+    font-size: 9px !important;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+
+  .content {
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding: 12px 10px calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .fb-home-layout {
+    display: block !important;
+    width: 100%;
+    padding: 0 0 12px !important;
+  }
+
+  .fb-home-main {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .fb-home-right {
+    display: none;
+  }
+
+  .fb-home-card,
+  .fb-stories-card {
+    padding: 14px !important;
+    margin-bottom: 12px !important;
+    border-radius: 16px !important;
+  }
+
+  .fb-story {
+    flex: 0 0 100px;
+    width: 100px;
+    min-width: 100px;
+  }
+
+  .post {
+    padding: 15px !important;
+    border-radius: 16px !important;
+  }
+
+  .post-actions button {
+    flex: 1 1 auto;
+    padding: 8px 5px;
+    font-size: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fb-story {
+    transition: none !important;
+  }
+}
