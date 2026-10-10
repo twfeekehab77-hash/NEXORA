@@ -481,7 +481,7 @@ async function blockUser(userId, reason = "Blocked by user") {
       await Promise.all([
         loadDeveloperReports(),
         loadDeveloperBans(),
-        loadDeveloperBadges(),
+        loadDeveloperBadges(userId),
       ]);
     }
   }
@@ -572,8 +572,8 @@ async function blockUser(userId, reason = "Blocked by user") {
     }));
   }
 
-  async function loadDeveloperBadges() {
-    if (session?.user?.id !== "e4a5054b-981a-483e-bcec-3017d120c13f") return;
+  async function loadDeveloperBadges(userId) {
+    if (userId !== "e4a5054b-981a-483e-bcec-3017d120c13f") return;
 
     const { data, error } = await supabase
       .from("profiles")
