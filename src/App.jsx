@@ -130,6 +130,7 @@ function App() {
   const [posts, setPosts] = useState([]);
   const [stories, setStories] = useState([]);
   const [likes, setLikes] = useState({});
+  const [openReactionPost, setOpenReactionPost] = useState(null);
   const [comments, setComments] = useState({});
   const [commentText, setCommentText] = useState({});
 
@@ -3775,55 +3776,86 @@ async function blockUser(userId, reason = "Blocked by user") {
                         )}
 
                       <div className="post-actions">
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            flexWrap: "wrap",
-                            gap: "6px",
-                          }}
-                        >
-                          {[
-                            { type: "LIKE", emoji: "👍", label: "Like" },
-                            { type: "LOVE", emoji: "❤️", label: "Love" },
-                            { type: "HAHA", emoji: "😂", label: "Haha" },
-                            { type: "WOW", emoji: "😮", label: "Wow" },
-                            { type: "SAD", emoji: "😢", label: "Sad" },
-                            { type: "ANGRY", emoji: "😡", label: "Angry" },
-                          ].map((reaction) => (
-                            <button
-                              key={reaction.type}
-                              type="button"
-                              title={reaction.label}
-                              aria-label={reaction.label}
-                              onClick={() =>
-                                toggleLike(post.id, reaction.type)
-                              }
+                        <div style={{ position: "relative", display: "inline-block" }}>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setOpenReactionPost((current) =>
+                                current === post.id ? null : post.id
+                              )
+                            }
+                            style={{
+                              border: "none",
+                              background: "transparent",
+                              cursor: "pointer",
+                              fontWeight: "600",
+                              color: postLike.likedByMe ? "#1877f2" : "inherit",
+                              padding: "8px 10px",
+                            }}
+                          >
+                            {postLike.likedByMe
+                              ? ({
+                                  LIKE: "👍 أعجبني",
+                                  LOVE: "❤️ أحببته",
+                                  HAHA: "😂 أضحكني",
+                                  WOW: "😮 أدهشني",
+                                  SAD: "😢 أحزنني",
+                                  ANGRY: "😡 أغضبني",
+                                }[postLike.reactionType] || "👍 أعجبني")
+                              : "👍 أعجبني"}
+                            {postLike.count > 0 && ` (${postLike.count})`}
+                          </button>
+
+                          {openReactionPost === post.id && (
+                            <div
                               style={{
-                                borderRadius: "18px",
-                                padding: "6px 9px",
-                                border:
-                                  postLike.reactionType === reaction.type
-                                    ? "2px solid #5b8def"
-                                    : "1px solid #88888855",
-                                background:
-                                  postLike.reactionType === reaction.type
-                                    ? "#5b8def22"
-                                    : "transparent",
-                                fontWeight:
-                                  postLike.reactionType === reaction.type
-                                    ? "bold"
-                                    : "normal",
-                                cursor: "pointer",
+                                position: "absolute",
+                                bottom: "100%",
+                                left: 0,
+                                zIndex: 20,
+                                display: "flex",
+                                gap: "5px",
+                                padding: "8px",
+                                borderRadius: "30px",
+                                background: "var(--card-bg, #ffffff)",
+                                boxShadow: "0 3px 16px #0003",
+                                border: "1px solid #8885",
                               }}
                             >
-                              {reaction.emoji}
-                            </button>
-                          ))}
-                          {postLike.count > 0 && (
-                            <span title="Total reactions">
-                              {postLike.count}
-                            </span>
+                              {[
+                                { type: "LIKE", emoji: "👍", label: "أعجبني" },
+                                { type: "LOVE", emoji: "❤️", label: "أحببته" },
+                                { type: "HAHA", emoji: "😂", label: "أضحكني" },
+                                { type: "WOW", emoji: "😮", label: "أدهشني" },
+                                { type: "SAD", emoji: "😢", label: "أحزنني" },
+                                { type: "ANGRY", emoji: "😡", label: "أغضبني" },
+                              ].map((reaction) => (
+                                <button
+                                  key={reaction.type}
+                                  type="button"
+                                  title={reaction.label}
+                                  aria-label={reaction.label}
+                                  onClick={async () => {
+                                    await toggleLike(post.id, reaction.type);
+                                    setOpenReactionPost(null);
+                                  }}
+                                  style={{
+                                    border: "none",
+                                    background:
+                                      postLike.reactionType === reaction.type
+                                        ? "#1877f233"
+                                        : "transparent",
+                                    borderRadius: "50%",
+                                    fontSize: "25px",
+                                    padding: "4px",
+                                    cursor: "pointer",
+                                    transition: "transform 120ms ease",
+                                  }}
+                                >
+                                  {reaction.emoji}
+                                </button>
+                              ))}
+                            </div>
                           )}
                         </div>
 
