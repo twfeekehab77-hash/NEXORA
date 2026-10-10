@@ -398,7 +398,6 @@ async function blockUser(userId, reason = "Blocked by user") {
   }
 
   async function loadDeveloperReports() {
-    if (!profile?.is_owner) return;
 
     const { data, error } = await supabase
       .from("user_reports")
