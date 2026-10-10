@@ -3,7 +3,7 @@ import Login from "./Login";
 import { supabase } from "./lib/supabaseClient";
 import "./App.css";
 import "./OwnProfile.css";
-import { languages, getLanguage, getTranslations, getSavedLanguage, applyLanguage } from "./i18n";
+
 
 function NIcon({ name, size = 21, stroke = 2 }) {
   const common = {
