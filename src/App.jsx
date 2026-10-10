@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Login from "./Login";
 import { supabase } from "./lib/supabaseClient";
-import { getSavedLanguage, getTranslations } from "./i18n";
+import { getSavedLanguage, getTranslations, applyLanguage } from "./i18n";
 import "./App.css";
 import "./OwnProfile.css";
 
