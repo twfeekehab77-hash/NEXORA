@@ -2107,6 +2107,37 @@ async function blockUser(userId, reason = "Blocked by user") {
         .nexora-top-nav-icon{position:relative;display:grid;place-items:center;}
         .nexora-top-nav-label{font-size:12px;font-weight:650;white-space:nowrap;}
         .nexora-top-nav-badge{position:absolute;top:2px;right:calc(50% - 25px);min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+
+        /* Responsive Messenger-style layout */
+        .nexora-messages-layout{
+          grid-template-columns:minmax(220px,300px) minmax(0,1fr)!important;
+          width:100%;
+          max-width:100%;
+          min-width:0;
+          align-items:stretch;
+        }
+        .nexora-messages-layout>*{
+          min-width:0;
+        }
+        .nexora-messages-layout input{
+          min-width:0;
+          box-sizing:border-box;
+        }
+        @media(max-width:760px){
+          .nexora-messages-layout{
+            grid-template-columns:minmax(0,1fr)!important;
+            gap:12px!important;
+            margin-top:12px!important;
+            min-height:0!important;
+          }
+          .nexora-messages-layout>*{
+            width:100%;
+            box-sizing:border-box;
+          }
+          .nexora-messages-layout>div:last-child{
+            min-height:380px;
+          }
+        }
 `}</style>
       <aside className="sidebar">
         <div className="logo">NEXORA</div>
@@ -3213,9 +3244,10 @@ async function blockUser(userId, reason = "Blocked by user") {
             <h2>Private Messages 💬</h2>
 
             <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "280px 1fr",
+              className="nexora-messages-layout"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "280px 1fr",
                 gap: "20px",
                 marginTop: "20px",
                 minHeight: "500px",
