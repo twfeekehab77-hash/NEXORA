@@ -3660,6 +3660,59 @@ async function blockUser(userId, reason = "Blocked by user") {
                 <strong>NEXORA</strong>
                 <span>Home</span>
               </div>
+            <section className="fb-home-card fb-stories-card">
+              <div className="fb-section-title">
+                <div>
+                  <h3>Stories</h3>
+                  <span>Share moments with your friends</span>
+                </div>
+                <NIcon name="ChevronRight" size={20} />
+              </div>
+
+              <div className="fb-stories-row">
+                <label className="fb-story create-story">
+                  <div className="fb-story-bg create-story-bg">
+                    <div className="story-plus"><NIcon name="Plus" size={22} /></div>
+                  </div>
+                  <strong>Create story</strong>
+                  <input type="file" accept="image/*,video/*" onChange={handleStorySelect} hidden />
+                </label>
+
+                {stories.map((story) => (
+                  <button key={story.id} className="fb-story" onClick={() => setSelectedStory(story)}>
+                    <div className="fb-story-bg">
+                      {story.media_type === "video" ? (
+                        <video src={story.media_url} muted preload="none" />
+                      ) : (
+                        <img src={story.media_url} alt="Story" loading="lazy" />
+                      )}
+                      <div className="fb-story-avatar">
+                        {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : avatarLetter}
+                      </div>
+                    </div>
+                    <strong>{profile?.full_name || "NEXORA"}</strong>
+                  </button>
+                ))}
+              </div>
+
+              {selectedStory && !selectedStory.id && (
+                <div className="fb-story-preview">
+                  <h4>Story Preview</h4>
+                  {selectedStory.type.startsWith("video/") ? (
+                    <video src={storyPreview} controls />
+                  ) : (
+                    <img src={storyPreview} alt="Story Preview" />
+                  )}
+                  <div className="fb-preview-actions">
+                    <button className="fb-publish" onClick={createStory} disabled={storyUploading}>
+                      {storyUploading ? "Uploading..." : "Publish Story"}
+                    </button>
+                    <button onClick={removeSelectedStory}>Remove</button>
+                  </div>
+                </div>
+              )}
+            </section>
+
             <section className="fb-home-card">
               <div className="fb-create-head">
                 <div className="fb-avatar">
@@ -3716,59 +3769,6 @@ async function blockUser(userId, reason = "Blocked by user") {
               <button className="fb-publish" onClick={createPost} disabled={posting || uploading}>
                 {uploading ? "Uploading..." : posting ? "Publishing..." : "Post"}
               </button>
-            </section>
-
-            <section className="fb-home-card fb-stories-card">
-              <div className="fb-section-title">
-                <div>
-                  <h3>Stories</h3>
-                  <span>Share moments with your friends</span>
-                </div>
-                <NIcon name="ChevronRight" size={20} />
-              </div>
-
-              <div className="fb-stories-row">
-                <label className="fb-story create-story">
-                  <div className="fb-story-bg create-story-bg">
-                    <div className="story-plus"><NIcon name="Plus" size={22} /></div>
-                  </div>
-                  <strong>Create story</strong>
-                  <input type="file" accept="image/*,video/*" onChange={handleStorySelect} hidden />
-                </label>
-
-                {stories.map((story) => (
-                  <button key={story.id} className="fb-story" onClick={() => setSelectedStory(story)}>
-                    <div className="fb-story-bg">
-                      {story.media_type === "video" ? (
-                        <video src={story.media_url} muted preload="none" />
-                      ) : (
-                        <img src={story.media_url} alt="Story" loading="lazy" />
-                      )}
-                      <div className="fb-story-avatar">
-                        {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : avatarLetter}
-                      </div>
-                    </div>
-                    <strong>{profile?.full_name || "NEXORA"}</strong>
-                  </button>
-                ))}
-              </div>
-
-              {selectedStory && !selectedStory.id && (
-                <div className="fb-story-preview">
-                  <h4>Story Preview</h4>
-                  {selectedStory.type.startsWith("video/") ? (
-                    <video src={storyPreview} controls />
-                  ) : (
-                    <img src={storyPreview} alt="Story Preview" />
-                  )}
-                  <div className="fb-preview-actions">
-                    <button className="fb-publish" onClick={createStory} disabled={storyUploading}>
-                      {storyUploading ? "Uploading..." : "Publish Story"}
-                    </button>
-                    <button onClick={removeSelectedStory}>Remove</button>
-                  </div>
-                </div>
-              )}
             </section>
 
             <section className="fb-feed-heading">
