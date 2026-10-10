@@ -16,6 +16,73 @@ function NIcon({ name, size = 21, stroke = 2 }) {
   };
 
   const icons = {
+    Video: (
+      <>
+        <rect x="3" y="5" width="13" height="14" rx="2"
+          fill="none" stroke="currentColor" strokeWidth={stroke} />
+        <path d="m16 10 5-3v10l-5-3"
+          fill="none" stroke="currentColor" strokeWidth={stroke}
+          strokeLinejoin="round" />
+        <path d="m8 9 4 3-4 3Z" fill="currentColor" />
+      </>
+    ),
+    Marketplace: (
+      <>
+        <path d="M3 10h18l-2-6H5l-2 6Z"
+          fill="none" stroke="currentColor" strokeWidth={stroke}
+          strokeLinejoin="round" />
+        <path d="M5 10v10h14V10M9 20v-6h6v6"
+          fill="none" stroke="currentColor" strokeWidth={stroke}
+          strokeLinejoin="round" />
+      </>
+    ),
+    Groups: (
+      <>
+        <circle cx="9" cy="8" r="3"
+          fill="none" stroke="currentColor" strokeWidth={stroke} />
+        <path d="M3 20v-2a6 6 0 0 1 12 0v2H3Z"
+          fill="none" stroke="currentColor" strokeWidth={stroke}
+          strokeLinejoin="round" />
+        <path d="M16 5.5a3 3 0 0 1 0 5.8M18 14a5 5 0 0 1 3 4.5V20h-3"
+          fill="none" stroke="currentColor" strokeWidth={stroke}
+          strokeLinecap="round" />
+      </>
+    ),
+    Gaming: (
+      <>
+        <path d="M7 8h10a4 4 0 0 1 3.8 5l-1 3.2a2 2 0 0 1-3.2 1l-2.2-2H9.6l-2.2 2a2 2 0 0 1-3.2-1l-1-3.2A4 4 0 0 1 7 8Z"
+          fill="none" stroke="currentColor" strokeWidth={stroke}
+          strokeLinejoin="round" />
+        <path d="M7 11v4M5 13h4"
+          fill="none" stroke="currentColor" strokeWidth={stroke}
+          strokeLinecap="round" />
+        <circle cx="16" cy="12" r="1" fill="currentColor" />
+        <circle cx="18" cy="14" r="1" fill="currentColor" />
+      </>
+    ),
+    Camera: (
+      <>
+        <path d="M4 7h3l2-3h6l2 3h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"
+          fill="none" stroke="currentColor" strokeWidth={stroke}
+          strokeLinejoin="round" />
+        <circle cx="12" cy="13" r="4"
+          fill="none" stroke="currentColor" strokeWidth={stroke} />
+      </>
+    ),
+    Edit: (
+      <>
+        <path d="m14 5 5 5M4 20l4.2-.9L20 7.3 16.7 4 4.9 15.8 4 20Z"
+          fill="none" stroke="currentColor" strokeWidth={stroke}
+          strokeLinejoin="round" />
+      </>
+    ),
+    More: (
+      <>
+        <circle cx="5" cy="12" r="1.7" fill="currentColor" />
+        <circle cx="12" cy="12" r="1.7" fill="currentColor" />
+        <circle cx="19" cy="12" r="1.7" fill="currentColor" />
+      </>
+    ),
     Home: (
       <path
         fill="currentColor"
@@ -221,7 +288,10 @@ const [ownProfileFollowing, setOwnProfileFollowing] = useState(0);
 
   const menu = [
     { name: t.home, icon: "Home", key: "Home" },
-    { name: "🎬 Reels", icon: "Image", key: "Reels" },
+    { name: "Video / Reels", icon: "Video", key: "Reels" },
+    { name: "Marketplace", icon: "Marketplace", key: "Marketplace" },
+    { name: "Groups", icon: "Groups", key: "Groups" },
+    { name: "Gaming", icon: "Gaming", key: "Gaming" },
     { name: t.explore, icon: "Explore", key: "Explore" },
     { name: t.messages, icon: "Messages", key: "Messages" },
     { name: t.notifications, icon: "Notifications", key: "Notifications" },
@@ -2878,6 +2948,39 @@ async function blockUser(userId, reason = "Blocked by user") {
                   </div>
                 )}
               </div>
+            </div>
+          </section>
+        ) : ["Marketplace", "Groups", "Gaming"].includes(active) ? (
+          <section className="welcome">
+            <div style={{maxWidth:760,margin:"0 auto",padding:"28px 12px"}}>
+              <div style={{fontSize:42,marginBottom:12}}>
+                {active === "Marketplace" ? "🛍️" : active === "Groups" ? "👥" : "🎮"}
+              </div>
+              <h2 style={{marginBottom:8}}>
+                {active === "Marketplace" ? "Marketplace" :
+                 active === "Groups" ? "Groups" : "Gaming"}
+              </h2>
+              <p style={{color:"#65676b",lineHeight:1.7}}>
+                {active === "Marketplace"
+                  ? "Discover and share items with the NEXORA community."
+                  : active === "Groups"
+                  ? "Find people who share your interests and build a community."
+                  : "Explore the gaming community on NEXORA."}
+              </p>
+              <div className="fb-right-card" style={{marginTop:22,padding:22}}>
+                <strong>Coming soon</strong>
+                <p style={{marginBottom:0,color:"#65676b",lineHeight:1.7}}>
+                  This section is an initial interface. Its full features and database
+                  integration have not been implemented yet.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActive("Home")}
+                style={{marginTop:18,padding:"10px 16px",border:0,borderRadius:9,background:"#1877f2",color:"#fff",fontWeight:700,cursor:"pointer"}}
+              >
+                Back to Home
+              </button>
             </div>
           </section>
         ) : active === "Reels" ? (
