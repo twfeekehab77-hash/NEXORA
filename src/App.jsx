@@ -154,6 +154,10 @@ function App() {
   const [blockedUsers, setBlockedUsers] = useState({});
   const [reports, setReports] = useState([]);
   const [adminBans, setAdminBans] = useState([]);
+  const [badgeUsers, setBadgeUsers] = useState([]);
+  const [badgeSearch, setBadgeSearch] = useState("");
+  const [badgeSaving, setBadgeSaving] = useState("");
+
 
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -477,6 +481,7 @@ async function blockUser(userId, reason = "Blocked by user") {
       await Promise.all([
         loadDeveloperReports(),
         loadDeveloperBans(),
+        loadDeveloperBadges(),
       ]);
     }
   }
@@ -484,7 +489,7 @@ async function blockUser(userId, reason = "Blocked by user") {
   async function loadProfile(userId) {
     const { data, error } = await supabase
       .from("profiles")
-      .select("id,username,full_name,avatar_url,bio,is_owner")
+      .select("id,username,full_name,avatar_url,bio,is_owner,heart_badge,verified_badge")
       .eq("id", userId)
       .single();
 
@@ -567,6 +572,69 @@ async function blockUser(userId, reason = "Blocked by user") {
     }));
   }
 
+  async function loadDeveloperBadges() {
+    if (session?.user?.id !== "e4a5054b-981a-483e-bcec-3017d120c13f") return;
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id,username,full_name,heart_badge,verified_badge")
+      .order("username", { ascending: true });
+
+    if (error) {
+      console.error("Load badge users:", error);
+      setSaveMessage(error.message);
+      return;
+    }
+
+    setBadgeUsers(data || []);
+  }
+
+  async function toggleUserBadge(userId, badgeName, currentValue) {
+    if (!profile?.is_owner || badgeSaving) return;
+
+    setBadgeSaving(userId + ":" + badgeName);
+
+    const user = badgeUsers.find((item) => item.id === userId);
+    if (!user) {
+      setBadgeSaving("");
+      return;
+    }
+
+    const heartBadge = badgeName === "heart_badge"
+      ? !currentValue
+      : Boolean(user.heart_badge);
+
+    const verifiedBadge = badgeName === "verified_badge"
+      ? !currentValue
+      : Boolean(user.verified_badge);
+
+    const { error } = await supabase.rpc("set_nexora_user_badges", {
+      p_user_id: userId,
+      p_heart_badge: heartBadge,
+      p_verified_badge: verifiedBadge,
+    });
+
+    if (error) {
+      console.error("Save user badge:", error);
+      setSaveMessage("Badge update failed: " + error.message);
+    } else {
+      setBadgeUsers((previous) =>
+        previous.map((item) =>
+          item.id === userId
+            ? {
+                ...item,
+                heart_badge: heartBadge,
+                verified_badge: verifiedBadge,
+              }
+            : item
+        )
+      );
+      setSaveMessage("User badges updated successfully.");
+    }
+
+    setBadgeSaving("");
+  }
+
   async function loadUsers() {
     if (!session) return;
 
@@ -574,7 +642,7 @@ async function blockUser(userId, reason = "Blocked by user") {
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("id,username,full_name,avatar_url,bio")
+      .select("id,username,full_name,avatar_url,bio,heart_badge,verified_badge")
       .neq("id", session.user.id)
       .order("username", { ascending: true });
 
@@ -598,14 +666,14 @@ async function blockUser(userId, reason = "Blocked by user") {
     const [usernameResult, nameResult] = await Promise.all([
       supabase
         .from("profiles")
-        .select("id,username,full_name,avatar_url,bio")
+        .select("id,username,full_name,avatar_url,bio,heart_badge,verified_badge")
         .neq("id", session.user.id)
         .ilike("username", `%${text}%`)
         .limit(20),
 
       supabase
         .from("profiles")
-        .select("id,username,full_name,avatar_url,bio")
+        .select("id,username,full_name,avatar_url,bio,heart_badge,verified_badge")
         .neq("id", session.user.id)
         .ilike("full_name", `%${text}%`)
         .limit(20),
@@ -750,7 +818,7 @@ async function blockUser(userId, reason = "Blocked by user") {
         error: profilesError,
       } = await supabase
         .from("profiles")
-        .select("id,username,full_name,avatar_url,is_owner")
+        .select("id,username,full_name,avatar_url,is_owner,heart_badge,verified_badge")
         .in("id", userIds);
 
       if (profilesError) {
@@ -839,7 +907,7 @@ async function blockUser(userId, reason = "Blocked by user") {
         error: profilesError,
       } = await supabase
         .from("profiles")
-        .select("id,username,full_name,avatar_url,is_owner")
+        .select("id,username,full_name,avatar_url,is_owner,heart_badge,verified_badge")
         .in("id", userIds);
 
       if (profilesError) {
@@ -1117,7 +1185,7 @@ async function blockUser(userId, reason = "Blocked by user") {
     if (actorIds.length > 0) {
       const { data: actors, error: actorsError } = await supabase
         .from("profiles")
-        .select("id,username,full_name,avatar_url,is_owner")
+        .select("id,username,full_name,avatar_url,is_owner,heart_badge,verified_badge")
         .in("id", actorIds);
 
       if (actorsError) {
@@ -1565,7 +1633,7 @@ async function blockUser(userId, reason = "Blocked by user") {
       })
       .eq("id", session.user.id)
       .select(
-        "id,username,full_name,avatar_url,bio"
+        "id,username,full_name,avatar_url,bio,heart_badge,verified_badge"
       )
       .single();
 
@@ -1638,7 +1706,7 @@ async function blockUser(userId, reason = "Blocked by user") {
         })
         .eq("id", session.user.id)
         .select(
-          "id,username,full_name,avatar_url,bio"
+          "id,username,full_name,avatar_url,bio,heart_badge,verified_badge"
         )
         .single();
 
@@ -2182,7 +2250,7 @@ async function blockUser(userId, reason = "Blocked by user") {
                     <div className="profile-main-info">
                       <div className="profile-title-row">
                         <div>
-                          <h2>{selectedUserProfile.full_name || "NEXORA User"} {selectedUserProfile.is_owner && (<span title="NEXORA Owner" style={{marginLeft:"8px",padding:"3px 7px",borderRadius:"999px",background:"linear-gradient(135deg,#f59e0b,#facc15,#d97706)",color:"#fff",fontSize:"11px",fontWeight:"800",boxShadow:"0 2px 6px rgba(245,158,11,.4)",verticalAlign:"middle"}}>👑 OWNER</span>)}</h2>
+                          <h2>{selectedUserProfile.full_name || "NEXORA User"} {selectedUserProfile.verified_badge && <span title="NEXORA Verified" aria-label="NEXORA Verified" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"17px",height:"17px",marginLeft:"5px",borderRadius:"50%",background:"#1877f2",color:"#fff",fontSize:"12px",fontWeight:"900",verticalAlign:"middle"}}>✓</span>} {selectedUserProfile.heart_badge && <span title="NEXORA Heart Badge" style={{marginLeft:"4px"}}>❤️</span>} {selectedUserProfile.is_owner && (<span title="NEXORA Owner" style={{marginLeft:"8px",padding:"3px 7px",borderRadius:"999px",background:"linear-gradient(135deg,#f59e0b,#facc15,#d97706)",color:"#fff",fontSize:"11px",fontWeight:"800",boxShadow:"0 2px 6px rgba(245,158,11,.4)",verticalAlign:"middle"}}>👑 OWNER</span>)}</h2>
                           <p>@{selectedUserProfile.username || "user"}</p>
                         </div>
                         <div className="profile-actions">
@@ -2433,6 +2501,115 @@ async function blockUser(userId, reason = "Blocked by user") {
                 <strong>💬 Messages</strong>
                 <h2>{users.length}</h2>
                 <span>Available contacts</span>
+              </div>
+            </div>
+
+            <div className="fb-right-card" style={{marginTop:"18px"}}>
+              <h3>🏅 Badge Management</h3>
+              <p style={{opacity:.75}}>Search for a user and grant or remove badges.</p>
+
+              <input
+                type="text"
+                value={badgeSearch}
+                onChange={(event) => setBadgeSearch(event.target.value)}
+                placeholder="Search by name or username..."
+                style={{
+                  width:"100%",
+                  boxSizing:"border-box",
+                  padding:"12px",
+                  border:"1px solid #d1d5db",
+                  borderRadius:"10px",
+                  margin:"8px 0 14px"
+                }}
+              />
+
+              <div style={{display:"grid",gap:"10px"}}>
+                {badgeUsers
+                  .filter((user) => {
+                    const query = badgeSearch.trim().toLowerCase();
+                    return !query ||
+                      (user.full_name || "").toLowerCase().includes(query) ||
+                      (user.username || "").toLowerCase().includes(query);
+                  })
+                  .map((user) => (
+                    <div key={user.id} style={{
+                      display:"flex",
+                      alignItems:"center",
+                      justifyContent:"space-between",
+                      flexWrap:"wrap",
+                      gap:"10px",
+                      padding:"12px",
+                      borderRadius:"12px",
+                      background:"rgba(127,127,127,.08)"
+                    }}>
+                      <div>
+                        <strong>{user.full_name || "NEXORA User"}</strong>
+                        <div style={{fontSize:"12px",opacity:.7}}>
+                          @{user.username || "user"}
+                        </div>
+                        <div style={{marginTop:"5px",fontSize:"13px"}}>
+                          {user.heart_badge && <span>❤️ Heart badge </span>}
+                          {user.verified_badge && <span>☑️ Verified </span>}
+                          {!user.heart_badge && !user.verified_badge && <span>No badges</span>}
+                        </div>
+                      </div>
+
+                      <div style={{display:"flex",gap:"8px",flexWrap:"wrap"}}>
+                        <button
+                          disabled={Boolean(badgeSaving)}
+                          onClick={() => toggleUserBadge(
+                            user.id,
+                            "heart_badge",
+                            Boolean(user.heart_badge)
+                          )}
+                          style={{
+                            padding:"8px 10px",
+                            border:0,
+                            borderRadius:"8px",
+                            cursor:badgeSaving ? "wait" : "pointer",
+                            background:user.heart_badge ? "#fee2e2" : "#dc2626",
+                            color:user.heart_badge ? "#991b1b" : "#fff",
+                            fontWeight:700
+                          }}
+                        >
+                          {badgeSaving === user.id + ":heart_badge"
+                            ? "Saving..."
+                            : user.heart_badge ? "❤️ Remove" : "❤️ Grant"}
+                        </button>
+
+                        <button
+                          disabled={Boolean(badgeSaving)}
+                          onClick={() => toggleUserBadge(
+                            user.id,
+                            "verified_badge",
+                            Boolean(user.verified_badge)
+                          )}
+                          style={{
+                            padding:"8px 10px",
+                            border:0,
+                            borderRadius:"8px",
+                            cursor:badgeSaving ? "wait" : "pointer",
+                            background:user.verified_badge ? "#dbeafe" : "#2563eb",
+                            color:user.verified_badge ? "#1d4ed8" : "#fff",
+                            fontWeight:700
+                          }}
+                        >
+                          {badgeSaving === user.id + ":verified_badge"
+                            ? "Saving..."
+                            : user.verified_badge ? "☑️ Remove" : "☑️ Verify"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                {badgeUsers.filter((user) => {
+                  const query = badgeSearch.trim().toLowerCase();
+                  return !query ||
+                    (user.full_name || "").toLowerCase().includes(query) ||
+                    (user.username || "").toLowerCase().includes(query);
+                }).length === 0 && (
+                  <p style={{opacity:.7}}>No matching users found.</p>
+                )}
               </div>
             </div>
 
@@ -3034,7 +3211,11 @@ async function blockUser(userId, reason = "Blocked by user") {
       <div className="own-profile-info">
         <div className="own-profile-title-row">
           <div>
-            <h2>{profile?.full_name || editName || "Your name"}</h2>
+            <h2>
+  {profile?.full_name || editName || "Your name"}
+  {profile?.verified_badge && <span title="NEXORA Verified" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"17px",height:"17px",marginLeft:"5px",borderRadius:"50%",background:"#1877f2",color:"#fff",fontSize:"12px",fontWeight:"900",verticalAlign:"middle"}}>✓</span>}
+  {profile?.heart_badge && <span title="NEXORA Heart Badge" style={{marginLeft:"4px"}}>❤️</span>}
+</h2>
             <p className="own-profile-username">
               @{profile?.username || editUsername || "username"}
             </p>
@@ -3327,7 +3508,9 @@ async function blockUser(userId, reason = "Blocked by user") {
 
                         <div>
                           <strong>
-                            {postOwnerName} ✓
+                            {postOwnerName}
+                            {(postOwner?.verified_badge || (post.user_id === session.user.id && profile?.verified_badge)) && <span title="NEXORA Verified" aria-label="NEXORA Verified" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"16px",height:"16px",marginLeft:"5px",borderRadius:"50%",background:"#1877f2",color:"#fff",fontSize:"11px",fontWeight:"900",verticalAlign:"middle"}}>✓</span>}
+                            {(postOwner?.heart_badge || (post.user_id === session.user.id && profile?.heart_badge)) && <span title="NEXORA Heart Badge" style={{marginLeft:"4px"}}>❤️</span>}
                           </strong>
 
                           <span>
