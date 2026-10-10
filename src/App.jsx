@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Login from "./Login";
 import { supabase } from "./lib/supabaseClient";
 import "./App.css";
+import "./OwnProfile.css";
 import { languages, getLanguage, getTranslations, getSavedLanguage, applyLanguage } from "./i18n";
 
 function NIcon({ name, size = 21, stroke = 2 }) {
@@ -178,6 +179,12 @@ function App() {
   const [active, setActive] = useState("Home");
   const [showProfile, setShowProfile] = useState(false);
 
+const [ownProfileTab, setOwnProfileTab] = useState("posts");
+const [isEditingOwnProfile, setIsEditingOwnProfile] = useState(false);
+const [ownProfileFollowers, setOwnProfileFollowers] = useState(0);
+const [ownProfileFollowing, setOwnProfileFollowing] = useState(0);
+
+
   const [editName, setEditName] = useState("");
   const [editUsername, setEditUsername] = useState("");
   const [editBio, setEditBio] = useState("");
@@ -277,7 +284,30 @@ function App() {
     };
   }, []);
 
-  async function blockUser(userId, reason = "Blocked by user") {
+  
+useEffect(() => {
+  let cancelled = false;
+  async function loadOwnFollowCounts() {
+    const userId = session?.user?.id;
+    if (!userId) return;
+
+    const [followers, following] = await Promise.all([
+      supabase.from("follows").select("id", { count: "exact", head: true })
+        .eq("following_id", userId),
+      supabase.from("follows").select("id", { count: "exact", head: true })
+        .eq("follower_id", userId)
+    ]);
+
+    if (!cancelled) {
+      setOwnProfileFollowers(followers.count || 0);
+      setOwnProfileFollowing(following.count || 0);
+    }
+  }
+  loadOwnFollowCounts();
+  return () => { cancelled = true; };
+}, [session?.user?.id]);
+
+async function blockUser(userId, reason = "Blocked by user") {
     if (!session || !userId || userId === session.user.id) return;
 
     const { error } = await supabase
@@ -2990,119 +3020,115 @@ function App() {
             </div>
           </section>
         ) : showProfile ? (
-          <section className="welcome">
-            <h2>My Profile 👤</h2>
+          <section className="own-profile-page">
+  <div className="own-profile-card">
+    <div className="own-profile-cover"></div>
 
-            <div style={{ marginTop: "20px" }}>
-              <div
-                style={{
-                  width: "120px",
-                  height: "120px",
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  marginBottom: "15px",
-                  fontSize: "50px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: "#ddd",
-                }}
-              >
-                {profile?.avatar_url ? (
-                  <img
-                    src={profile.avatar_url}
-                    alt={t.profile}
-                    loading="lazy"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                ) : (
-                  avatarLetter
-                )}
-              </div>
+    <div className="own-profile-heading">
+      <div className="own-profile-avatar">
+        {profile?.avatar_url
+          ? <img src={profile.avatar_url} alt="Profile" />
+          : avatarLetter}
+      </div>
 
-              <label
-                style={{
-                  display: "inline-block",
-                  marginBottom: "20px",
-                  cursor: "pointer",
-                }}
-              >
-                <span className="primary-btn">
-                  Change Profile Photo
-                </span>
+      <div className="own-profile-info">
+        <div className="own-profile-title-row">
+          <div>
+            <h2>{profile?.full_name || editName || "Your name"}</h2>
+            <p className="own-profile-username">
+              @{profile?.username || editUsername || "username"}
+            </p>
+          </div>
+          <button className="own-profile-edit-button"
+            onClick={() => setIsEditingOwnProfile(v => !v)}>
+            {isEditingOwnProfile ? "Cancel" : "Edit Profile"}
+          </button>
+        </div>
 
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={uploadAvatar}
-                  disabled={saving}
-                  style={{ display: "none" }}
-                />
-              </label>
+        <div className="own-profile-stats">
+          <div><strong>{posts.filter(p => p.user_id === session?.user?.id).length}</strong> Posts</div>
+          <div><strong>{ownProfileFollowers}</strong> Followers</div>
+          <div><strong>{ownProfileFollowing}</strong> Following</div>
+        </div>
 
-              <input
-                type="text"
-                placeholder="Full name"
-                value={editName}
-                onChange={(e) =>
-                  setEditName(e.target.value)
-                }
-                style={{
-                  display: "block",
-                  width: "100%",
-                  maxWidth: "500px",
-                  padding: "12px",
-                  marginBottom: "12px",
-                }}
-              />
+        <p className="own-profile-bio">
+          {profile?.bio || editBio || "Welcome to my NEXORA profile."}
+        </p>
+      </div>
+    </div>
 
-              <input
-                type="text"
-                placeholder="Username"
-                value={editUsername}
-                onChange={(e) =>
-                  setEditUsername(e.target.value)
-                }
-                style={{
-                  display: "block",
-                  width: "100%",
-                  maxWidth: "500px",
-                  padding: "12px",
-                  marginBottom: "12px",
-                }}
-              />
+    {isEditingOwnProfile && (
+      <div className="own-profile-edit-form">
+        <h3>Edit your profile</h3>
+        <label className="own-profile-photo-label">
+          Change Profile Photo
+          <input type="file" accept="image/*"
+            onChange={uploadAvatar} disabled={saving} />
+        </label>
+        <input type="text" placeholder="Full name"
+          value={editName} onChange={e => setEditName(e.target.value)} />
+        <input type="text" placeholder="Username"
+          value={editUsername} onChange={e => setEditUsername(e.target.value)} />
+        <textarea placeholder="Bio" value={editBio}
+          onChange={e => setEditBio(e.target.value)} />
+        <button className="primary-btn" onClick={saveProfile} disabled={saving}>
+          {saving ? "Saving..." : "Save Changes"}
+        </button>
+        {saveMessage && <p>{saveMessage}</p>}
+      </div>
+    )}
 
-              <textarea
-                placeholder="Bio"
-                value={editBio}
-                onChange={(e) =>
-                  setEditBio(e.target.value)
-                }
-                style={{
-                  display: "block",
-                  width: "100%",
-                  maxWidth: "500px",
-                  minHeight: "120px",
-                  padding: "12px",
-                  marginBottom: "12px",
-                }}
-              />
+    <div className="own-profile-tabs">
+      {[
+        ["posts", "▦ Posts"],
+        ["reels", "▶ Reels"],
+        ["photos", "▧ Photos"]
+      ].map(([tab, label]) => (
+        <button key={tab}
+          className={"own-profile-tab" + (ownProfileTab === tab ? " active" : "")}
+          onClick={() => setOwnProfileTab(tab)}>
+          {label}
+        </button>
+      ))}
+    </div>
 
-              <button
-                className="primary-btn"
-                onClick={saveProfile}
-                disabled={saving}
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
+    <div className="own-profile-grid">
+      {posts.filter(post => {
+        if (post.user_id !== session?.user?.id) return false;
+        if (ownProfileTab === "reels")
+          return post.media_url && post.media_type === "video";
+        if (ownProfileTab === "photos")
+          return post.media_url && post.media_type === "image";
+        return true;
+      }).map(post => (
+        <article key={post.id} className="own-profile-post">
+          {post.media_url ? (
+            post.media_type === "video" ? (
+              <video src={post.media_url} controls playsInline preload="metadata" />
+            ) : (
+              <img src={post.media_url} alt="Post" loading="lazy" />
+            )
+          ) : (
+            <div className="own-profile-post-text">{post.content || ""}</div>
+          )}
+          {post.media_type === "video" && post.media_url &&
+            <span className="own-profile-reel-badge">▶ REEL</span>}
+        </article>
+      ))}
+    </div>
 
-              {saveMessage && <p>{saveMessage}</p>}
-            </div>
-          </section>
+    {posts.filter(post =>
+      post.user_id === session?.user?.id &&
+      (ownProfileTab === "posts" ||
+       (ownProfileTab === "reels" && post.media_url && post.media_type === "video") ||
+       (ownProfileTab === "photos" && post.media_url && post.media_type === "image"))
+    ).length === 0 && (
+      <div className="own-profile-empty">
+        No {ownProfileTab} yet. Your posts will appear here.
+      </div>
+    )}
+  </div>
+</section>
         ) : (
           <div className="fb-home-layout">
             <div className="fb-home-main">
