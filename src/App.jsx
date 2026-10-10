@@ -188,6 +188,7 @@ function App() {
 
   const menu = [
     { name: t.home, icon: "Home", key: "Home" },
+    { name: "🎬 Reels", icon: "Image", key: "Reels" },
     { name: t.explore, icon: "Explore", key: "Explore" },
     { name: t.messages, icon: "Messages", key: "Messages" },
     { name: t.notifications, icon: "Notifications", key: "Notifications" },
@@ -2168,22 +2169,79 @@ function App() {
                           >
                             <span>{following[selectedUserProfile.id] ? t.following : t.follow}</span>
                           </button>
-                          <button
-                            className="profile-action secondary"
-                            onClick={() => blockUser(selectedUserProfile.id)}
-                          >
-                            <span>🚫 Block</span>
-                          </button>
-                          <button
-                            className="profile-action secondary"
-                            onClick={() => {
-  console.log("REPORT BUTTON CLICKED", selectedUserProfile?.id);
-  setSaveMessage("Report button clicked...");
-  reportUser(selectedUserProfile.id);
-}}
-                          >
-                            <span>⚠️ Report</span>
-                          </button>
+                          <div className="profile-more-wrap" style={{ position: "relative" }}>
+                            <details className="profile-more-menu">
+                              <summary
+                                className="profile-action secondary"
+                                aria-label="More profile options"
+                                title="More options"
+                                style={{
+                                  cursor: "pointer",
+                                  listStyle: "none",
+                                  minWidth: "44px",
+                                  fontSize: "22px",
+                                  fontWeight: "800",
+                                  textAlign: "center"
+                                }}
+                              >
+                                ⋯
+                              </summary>
+                              <div style={{
+                                position: "absolute",
+                                right: 0,
+                                top: "calc(100% + 8px)",
+                                zIndex: 20,
+                                minWidth: "160px",
+                                padding: "6px",
+                                borderRadius: "12px",
+                                background: "var(--card-bg, #fff)",
+                                color: "var(--text-color, #222)",
+                                border: "1px solid rgba(127,127,127,.25)",
+                                boxShadow: "0 8px 28px rgba(0,0,0,.16)"
+                              }}>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.currentTarget.closest("details")?.removeAttribute("open");
+                                    blockUser(selectedUserProfile.id);
+                                  }}
+                                  style={{
+                                    display: "block",
+                                    width: "100%",
+                                    padding: "10px",
+                                    border: 0,
+                                    borderRadius: "8px",
+                                    background: "transparent",
+                                    color: "inherit",
+                                    textAlign: "left",
+                                    cursor: "pointer"
+                                  }}
+                                >
+                                  🚫 Block user
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.currentTarget.closest("details")?.removeAttribute("open");
+                                    reportUser(selectedUserProfile.id);
+                                  }}
+                                  style={{
+                                    display: "block",
+                                    width: "100%",
+                                    padding: "10px",
+                                    border: 0,
+                                    borderRadius: "8px",
+                                    background: "transparent",
+                                    color: "inherit",
+                                    textAlign: "left",
+                                    cursor: "pointer"
+                                  }}
+                                >
+                                  ⚠️ Report user
+                                </button>
+                              </div>
+                            </details>
+                          </div>
                         </div>
                       </div>
 
@@ -2327,6 +2385,47 @@ function App() {
                 )}
               </div>
             </div>
+          </section>
+        ) : active === "Reels" ? (
+          <section className="welcome">
+            <h2>🎬 Reels</h2>
+            <p>Watch video posts shared on NEXORA.</p>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+              gap: "16px",
+              marginTop: "20px"
+            }}>
+              {posts.filter((post) =>
+                post.media_url && post.media_type === "video"
+              ).map((post) => (
+                <article key={post.id} className="fb-home-card">
+                  <video
+                    src={post.media_url}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    style={{
+                      width: "100%",
+                      maxHeight: "520px",
+                      objectFit: "contain",
+                      borderRadius: "12px",
+                      background: "#111"
+                    }}
+                  />
+                  <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>
+                    {post.content || ""}
+                  </p>
+                </article>
+              ))}
+            </div>
+            {posts.filter((post) =>
+              post.media_url && post.media_type === "video"
+            ).length === 0 && (
+              <p style={{ marginTop: "20px", opacity: 0.7 }}>
+                No videos yet. Videos published on NEXORA will appear here.
+              </p>
+            )}
           </section>
         ) : active === "Notifications" ? (
           <section className="welcome">
