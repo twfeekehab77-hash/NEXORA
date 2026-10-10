@@ -967,7 +967,7 @@ async function blockUser(userId, reason = "Blocked by user") {
   async function loadLikes(userId) {
     const { data, error } = await supabase
       .from("post_likes")
-      .select("post_id,user_id");
+      .select("post_id,user_id,reaction_type");
 
     if (error) {
       console.error("Likes:", error);
@@ -981,6 +981,7 @@ async function blockUser(userId, reason = "Blocked by user") {
         likeData[like.post_id] = {
           count: 0,
           likedByMe: false,
+          reactionType: null,
         };
       }
 
@@ -988,6 +989,8 @@ async function blockUser(userId, reason = "Blocked by user") {
 
       if (like.user_id === userId) {
         likeData[like.post_id].likedByMe = true;
+        likeData[like.post_id].reactionType =
+          like.reaction_type || "LIKE";
       }
     });
 
@@ -1049,17 +1052,18 @@ async function blockUser(userId, reason = "Blocked by user") {
     }
   }
 
-  async function toggleLike(postId) {
+  async function toggleLike(postId, reactionType = "LIKE") {
     if (!session) return;
 
     const current = likes[postId] || {
       count: 0,
       likedByMe: false,
+      reactionType: null,
     };
 
     const userId = session.user.id;
 
-    if (current.likedByMe) {
+    if (current.likedByMe && current.reactionType === reactionType) {
       const { error } = await supabase
         .from("post_likes")
         .delete()
@@ -1074,8 +1078,31 @@ async function blockUser(userId, reason = "Blocked by user") {
       setLikes((prev) => ({
         ...prev,
         [postId]: {
+          ...(prev[postId] || current),
           count: Math.max(0, current.count - 1),
           likedByMe: false,
+          reactionType: null,
+        },
+      }));
+    } else if (current.likedByMe) {
+      const { error } = await supabase
+        .from("post_likes")
+        .update({ reaction_type: reactionType })
+        .eq("post_id", postId)
+        .eq("user_id", userId);
+
+      if (error) {
+        setSaveMessage(error.message);
+        return;
+      }
+
+      setLikes((prev) => ({
+        ...prev,
+        [postId]: {
+          ...(prev[postId] || current),
+          count: current.count,
+          likedByMe: true,
+          reactionType,
         },
       }));
     } else {
@@ -1084,6 +1111,7 @@ async function blockUser(userId, reason = "Blocked by user") {
         .insert({
           post_id: postId,
           user_id: userId,
+          reaction_type: reactionType,
         });
 
       if (error) {
@@ -1094,8 +1122,10 @@ async function blockUser(userId, reason = "Blocked by user") {
       setLikes((prev) => ({
         ...prev,
         [postId]: {
+          ...(prev[postId] || current),
           count: current.count + 1,
           likedByMe: true,
+          reactionType,
         },
       }));
 
@@ -3745,26 +3775,57 @@ async function blockUser(userId, reason = "Blocked by user") {
                         )}
 
                       <div className="post-actions">
-                        <button
-                          onClick={() =>
-                            toggleLike(post.id)
-                          }
+                        <div
                           style={{
-                            color: postLike.likedByMe
-                              ? "red"
-                              : "inherit",
-                            fontWeight:
-                              postLike.likedByMe
-                                ? "bold"
-                                : "normal",
+                            display: "flex",
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                            gap: "6px",
                           }}
                         >
-                          {postLike.likedByMe
-                            ? "❤️ Liked"
-                            : "♡ Like"}{" "}
-                          {postLike.count > 0 &&
-                            `(${postLike.count})`}
-                        </button>
+                          {[
+                            { type: "LIKE", emoji: "👍", label: "Like" },
+                            { type: "LOVE", emoji: "❤️", label: "Love" },
+                            { type: "HAHA", emoji: "😂", label: "Haha" },
+                            { type: "WOW", emoji: "😮", label: "Wow" },
+                            { type: "SAD", emoji: "😢", label: "Sad" },
+                            { type: "ANGRY", emoji: "😡", label: "Angry" },
+                          ].map((reaction) => (
+                            <button
+                              key={reaction.type}
+                              type="button"
+                              title={reaction.label}
+                              aria-label={reaction.label}
+                              onClick={() =>
+                                toggleLike(post.id, reaction.type)
+                              }
+                              style={{
+                                borderRadius: "18px",
+                                padding: "6px 9px",
+                                border:
+                                  postLike.reactionType === reaction.type
+                                    ? "2px solid #5b8def"
+                                    : "1px solid #88888855",
+                                background:
+                                  postLike.reactionType === reaction.type
+                                    ? "#5b8def22"
+                                    : "transparent",
+                                fontWeight:
+                                  postLike.reactionType === reaction.type
+                                    ? "bold"
+                                    : "normal",
+                                cursor: "pointer",
+                              }}
+                            >
+                              {reaction.emoji}
+                            </button>
+                          ))}
+                          {postLike.count > 0 && (
+                            <span title="Total reactions">
+                              {postLike.count}
+                            </span>
+                          )}
+                        </div>
 
                         <button
                           onClick={() => {
