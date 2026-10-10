@@ -167,6 +167,9 @@ function App() {
   const [selectedUserPosts, setSelectedUserPosts] = useState([]);
   const [selectedUserFollowers, setSelectedUserFollowers] = useState(0);
   const [selectedUserFollowing, setSelectedUserFollowing] = useState(0);
+  const [friendStatus, setFriendStatus] = useState("none");
+  const [friendRequestId, setFriendRequestId] = useState(null);
+  const [friendActionLoading, setFriendActionLoading] = useState(false);
   const [userProfileLoading, setUserProfileLoading] = useState(false);
   const [profileTab, setProfileTab] = useState("posts");
 
@@ -192,6 +195,7 @@ const [ownProfileFollowing, setOwnProfileFollowing] = useState(0);
   const [editName, setEditName] = useState("");
   const [editUsername, setEditUsername] = useState("");
   const [editBio, setEditBio] = useState("");
+  const [editIsPrivate, setEditIsPrivate] = useState(false);
 
   const [postText, setPostText] = useState("");
   const [selectedMedia, setSelectedMedia] = useState(null);
@@ -489,7 +493,7 @@ async function blockUser(userId, reason = "Blocked by user") {
   async function loadProfile(userId) {
     const { data, error } = await supabase
       .from("profiles")
-      .select("id,username,full_name,avatar_url,bio,is_owner,heart_badge,verified_badge")
+      .select("id,username,full_name,avatar_url,bio,is_owner,heart_badge,verified_badge,is_private")
       .eq("id", userId)
       .single();
 
@@ -503,6 +507,7 @@ async function blockUser(userId, reason = "Blocked by user") {
       setEditName(data.full_name || "");
       setEditUsername(data.username || "");
       setEditBio(data.bio || "");
+      setEditIsPrivate(Boolean(data.is_private));
     }
   }
 
@@ -570,6 +575,78 @@ async function blockUser(userId, reason = "Blocked by user") {
       ...prev,
       [userId]: true,
     }));
+  }
+
+  async function sendFriendRequest() {
+    const targetId = selectedUserProfile?.id;
+    if (!session || !targetId || targetId === session.user.id || friendActionLoading) return;
+
+    setFriendActionLoading(true);
+
+    const { data, error } = await supabase
+      .from("friend_requests")
+      .insert({
+        sender_id: session.user.id,
+        receiver_id: targetId,
+        status: "pending"
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      console.error("Send friend request:", error);
+      setSaveMessage(error.message);
+    } else {
+      setFriendRequestId(data.id);
+      setFriendStatus("outgoing");
+      setSaveMessage("Friend request sent.");
+    }
+
+    setFriendActionLoading(false);
+  }
+
+  async function respondToFriendRequest(accept) {
+    if (!session || !friendRequestId || friendActionLoading || !selectedUserProfile?.id) return;
+
+    setFriendActionLoading(true);
+
+    const { error } = await supabase
+      .from("friend_requests")
+      .update({ status: accept ? "accepted" : "rejected" })
+      .eq("id", friendRequestId)
+      .eq("receiver_id", session.user.id)
+      .eq("status", "pending");
+
+    if (error) {
+      console.error("Respond to friend request:", error);
+      setSaveMessage(error.message);
+      setFriendActionLoading(false);
+      return;
+    }
+
+    if (accept) {
+      const ids = [session.user.id, selectedUserProfile.id].sort();
+
+      const { error: friendshipError } = await supabase
+        .from("friendships")
+        .insert({ user1_id: ids[0], user2_id: ids[1] });
+
+      if (friendshipError) {
+        console.error("Create friendship:", friendshipError);
+        setSaveMessage("Request accepted, but friendship creation failed: " + friendshipError.message);
+        setFriendActionLoading(false);
+        return;
+      }
+
+      setFriendStatus("friends");
+      setSaveMessage("Friend request accepted.");
+    } else {
+      setFriendStatus("none");
+      setSaveMessage("Friend request declined.");
+    }
+
+    setFriendRequestId(null);
+    setFriendActionLoading(false);
   }
 
   async function loadDeveloperBadges(userId) {
@@ -745,6 +822,8 @@ async function blockUser(userId, reason = "Blocked by user") {
     setSelectedUserPosts([]);
     setSelectedUserFollowers(0);
     setSelectedUserFollowing(0);
+    setFriendStatus("none");
+    setFriendRequestId(null);
     setSearchText("");
     setSearchResults([]);
     setShowProfile(false);
@@ -786,6 +865,42 @@ async function blockUser(userId, reason = "Blocked by user") {
       console.error("User profile following:", followingResult.error);
     } else {
       setSelectedUserFollowing(followingResult.count || 0);
+    }
+
+    const viewerId = session.user.id;
+    const targetId = user.id;
+
+    if (targetId !== viewerId) {
+      const [friendsResult, outgoingResult, incomingResult] =
+        await Promise.all([
+          supabase.from("friendships").select("id")
+            .or(`and(user1_id.eq.${viewerId},user2_id.eq.${targetId}),and(user1_id.eq.${targetId},user2_id.eq.${viewerId})`)
+            .limit(1),
+          supabase.from("friend_requests").select("id")
+            .eq("sender_id", viewerId)
+            .eq("receiver_id", targetId)
+            .eq("status", "pending")
+            .limit(1),
+          supabase.from("friend_requests").select("id")
+            .eq("sender_id", targetId)
+            .eq("receiver_id", viewerId)
+            .eq("status", "pending")
+            .limit(1)
+        ]);
+
+      if (friendsResult.error) console.error("Check friendship:", friendsResult.error);
+      if (outgoingResult.error) console.error("Check outgoing request:", outgoingResult.error);
+      if (incomingResult.error) console.error("Check incoming request:", incomingResult.error);
+
+      if (friendsResult.data?.length) {
+        setFriendStatus("friends");
+      } else if (incomingResult.data?.length) {
+        setFriendStatus("incoming");
+        setFriendRequestId(incomingResult.data[0].id);
+      } else if (outgoingResult.data?.length) {
+        setFriendStatus("outgoing");
+        setFriendRequestId(outgoingResult.data[0].id);
+      }
     }
 
     setUserProfileLoading(false);
@@ -1630,10 +1745,11 @@ async function blockUser(userId, reason = "Blocked by user") {
         full_name: editName,
         username: editUsername,
         bio: editBio,
+        is_private: editIsPrivate,
       })
       .eq("id", session.user.id)
       .select(
-        "id,username,full_name,avatar_url,bio,heart_badge,verified_badge"
+        "id,username,full_name,avatar_url,bio,heart_badge,verified_badge,is_private"
       )
       .single();
 
@@ -1805,7 +1921,7 @@ async function blockUser(userId, reason = "Blocked by user") {
         <style>{`\n          .nexora { background: #f6f7fb; color: #17181c; }\n          .sidebar { background: rgba(255,255,255,.94); border-right: 1px solid #e7e8ee; box-shadow: 8px 0 30px rgba(20,20,40,.04); }\n          .logo { letter-spacing: .08em; font-weight: 800; }\n          .menu { display:flex; align-items:center; gap:12px; border-radius:12px; margin:4px 10px; transition:.18s ease; }\n          .menu:hover { background:#f1f2f6; transform:translateX(2px); }\n          .menu.active { background:#17181c; color:#fff; box-shadow:0 8px 20px rgba(23,24,28,.14); }\n          .nav-icon { width:24px; height:24px; display:grid; place-items:center; flex:none; color:#656873; transition:transform .18s ease,color .18s ease; }
           .menu.active .nav-icon { color:#fff; }
           .menu:hover .nav-icon { transform:scale(1.06); color:#17181c; }
-          .menu.active:hover .nav-icon { color:#fff; }\n          .nav-label { font-weight:600; }\n          .create-btn { display:flex; align-items:center; justify-content:center; gap:8px; border-radius:12px; font-weight:700; }\n          .search { display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:0 13px; box-shadow:0 5px 20px rgba(20,20,40,.05); }\n          .search-icon { display:grid; place-items:center; color:#737780; }\n          .search input { border:0 !important; outline:0 !important; background:transparent !important; box-shadow:none !important; }\n          .profile-mini { border:2px solid #fff; box-shadow:0 4px 14px rgba(0,0,0,.12); }\n          .public-profile-page { max-width:980px; margin:0 auto; padding-bottom:40px; }\n          .profile-back-btn { display:inline-flex; align-items:center; gap:8px; border:0; background:transparent; padding:8px 2px; color:#60636b; font-weight:700; cursor:pointer; margin-bottom:12px; }\n          .profile-back-btn:hover { color:#111; }\n          .profile-loading { padding:70px 20px; text-align:center; color:#747780; }\n          .public-profile-card, .profile-posts-card { background:#fff; border:1px solid #e7e8ee; border-radius:22px; overflow:hidden; box-shadow:0 10px 35px rgba(20,20,40,.06); }\n          .profile-cover { height:150px; background:linear-gradient(135deg,#18191d 0%,#34363d 50%,#777b84 100%); }\n          .profile-main { display:flex; gap:28px; padding:0 30px 30px; margin-top:-58px; align-items:flex-end; }\n          .profile-avatar-large { width:126px; height:126px; min-width:126px; border-radius:50%; border:6px solid #fff; background:#eceef2; display:grid; place-items:center; overflow:hidden; font-size:42px; font-weight:800; color:#50535b; box-shadow:0 8px 25px rgba(0,0,0,.15); }\n          .profile-avatar-large img { width:100%; height:100%; object-fit:cover; }\n          .profile-main-info { flex:1; padding-top:62px; min-width:0; }\n          .profile-title-row { display:flex; justify-content:space-between; gap:20px; align-items:flex-start; }\n          .profile-title-row h2 { margin:0; font-size:28px; line-height:1.15; }\n          .profile-title-row p { margin:6px 0 0; color:#70737c; font-weight:600; }\n          .profile-actions { display:flex; gap:9px; flex-wrap:wrap; }\n          .profile-action { border:0; border-radius:11px; padding:10px 16px; display:inline-flex; align-items:center; gap:7px; font-weight:750; cursor:pointer; transition:.18s ease; }\n          .profile-action:hover { transform:translateY(-1px); }\n          .profile-action.primary { background:#17181c; color:#fff; }\n          .profile-action.secondary { background:#eef0f4; color:#17181c; }\n          .profile-bio { margin:18px 0 16px; color:#4f525a; line-height:1.55; max-width:720px; }\n          .profile-stats { display:flex; gap:28px; flex-wrap:wrap; }\n          .profile-stats div { display:flex; align-items:baseline; gap:6px; }\n          .profile-stats strong { font-size:17px; }\n          .profile-stats span { color:#777a82; font-size:14px; }\n          .profile-posts-card { margin-top:18px; }\n          .profile-tabs { height:55px; border-bottom:1px solid #ececf0; display:flex; align-items:center; padding:0 24px; }\n          .profile-tab { height:55px; display:flex; align-items:center; border-bottom:2px solid transparent; font-weight:750; color:#858891; }\n          .profile-tab.active { color:#17181c; border-bottom-color:#17181c; }\n          .profile-post-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:2px; background:#fff; }\n          .profile-post-item { aspect-ratio:1/1; position:relative; overflow:hidden; background:#eceef2; }\n          .profile-post-item img, .profile-post-item video { width:100%; height:100%; object-fit:cover; display:block; }\n          .profile-post-item:hover .profile-post-overlay { opacity:1; }\n          .profile-post-overlay { position:absolute; inset:auto 0 0; padding:24px 10px 9px; color:#fff; font-size:11px; background:linear-gradient(transparent,rgba(0,0,0,.6)); opacity:0; transition:.18s; }\n          .profile-text-post { width:100%; height:100%; display:grid; place-items:center; padding:22px; text-align:center; font-weight:650; line-height:1.5; background:linear-gradient(135deg,#f2f3f6,#e6e8ed); }\n          .profile-empty { padding:70px 20px; text-align:center; color:#747780; }\n          .profile-empty-icon { width:60px; height:60px; border-radius:50%; margin:0 auto 12px; display:grid; place-items:center; background:#f0f1f4; color:#555861; }\n          .profile-empty h3 { margin:0 0 6px; color:#25262b; }\n          .profile-empty p { margin:0; }\n          @media (max-width:760px) {\n            .profile-main { flex-direction:column; align-items:center; text-align:center; padding:0 18px 24px; margin-top:-48px; }\n            .profile-avatar-large { width:104px; height:104px; min-width:104px; }\n            .profile-main-info { width:100%; padding-top:0; }\n            .profile-title-row { flex-direction:column; align-items:center; }\n            .profile-actions { justify-content:center; }\n            .profile-stats { justify-content:center; gap:18px; }\n            .profile-post-grid { grid-template-columns:repeat(3,1fr); }\n            .profile-cover { height:125px; }\n          }\n        `}</style>\n      <style>{`
+          .menu.active:hover .nav-icon { color:#fff; }\n          .nav-label { display:none; font-weight:600; }\n          .create-btn { display:flex; align-items:center; justify-content:center; gap:8px; border-radius:12px; font-weight:700; }\n          .search { display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:0 13px; box-shadow:0 5px 20px rgba(20,20,40,.05); }\n          .search-icon { display:grid; place-items:center; color:#737780; }\n          .search input { border:0 !important; outline:0 !important; background:transparent !important; box-shadow:none !important; }\n          .profile-mini { border:2px solid #fff; box-shadow:0 4px 14px rgba(0,0,0,.12); }\n          .public-profile-page { max-width:980px; margin:0 auto; padding-bottom:40px; }\n          .profile-back-btn { display:inline-flex; align-items:center; gap:8px; border:0; background:transparent; padding:8px 2px; color:#60636b; font-weight:700; cursor:pointer; margin-bottom:12px; }\n          .profile-back-btn:hover { color:#111; }\n          .profile-loading { padding:70px 20px; text-align:center; color:#747780; }\n          .public-profile-card, .profile-posts-card { background:#fff; border:1px solid #e7e8ee; border-radius:22px; overflow:hidden; box-shadow:0 10px 35px rgba(20,20,40,.06); }\n          .profile-cover { height:150px; background:linear-gradient(135deg,#18191d 0%,#34363d 50%,#777b84 100%); }\n          .profile-main { display:flex; gap:28px; padding:0 30px 30px; margin-top:-58px; align-items:flex-end; }\n          .profile-avatar-large { width:126px; height:126px; min-width:126px; border-radius:50%; border:6px solid #fff; background:#eceef2; display:grid; place-items:center; overflow:hidden; font-size:42px; font-weight:800; color:#50535b; box-shadow:0 8px 25px rgba(0,0,0,.15); }\n          .profile-avatar-large img { width:100%; height:100%; object-fit:cover; }\n          .profile-main-info { flex:1; padding-top:62px; min-width:0; }\n          .profile-title-row { display:flex; justify-content:space-between; gap:20px; align-items:flex-start; }\n          .profile-title-row h2 { margin:0; font-size:28px; line-height:1.15; }\n          .profile-title-row p { margin:6px 0 0; color:#70737c; font-weight:600; }\n          .profile-actions { display:flex; gap:9px; flex-wrap:wrap; }\n          .profile-action { border:0; border-radius:11px; padding:10px 16px; display:inline-flex; align-items:center; gap:7px; font-weight:750; cursor:pointer; transition:.18s ease; }\n          .profile-action:hover { transform:translateY(-1px); }\n          .profile-action.primary { background:#17181c; color:#fff; }\n          .profile-action.secondary { background:#eef0f4; color:#17181c; }\n          .profile-bio { margin:18px 0 16px; color:#4f525a; line-height:1.55; max-width:720px; }\n          .profile-stats { display:flex; gap:28px; flex-wrap:wrap; }\n          .profile-stats div { display:flex; align-items:baseline; gap:6px; }\n          .profile-stats strong { font-size:17px; }\n          .profile-stats span { color:#777a82; font-size:14px; }\n          .profile-posts-card { margin-top:18px; }\n          .profile-tabs { height:55px; border-bottom:1px solid #ececf0; display:flex; align-items:center; padding:0 24px; }\n          .profile-tab { height:55px; display:flex; align-items:center; border-bottom:2px solid transparent; font-weight:750; color:#858891; }\n          .profile-tab.active { color:#17181c; border-bottom-color:#17181c; }\n          .profile-post-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:2px; background:#fff; }\n          .profile-post-item { aspect-ratio:1/1; position:relative; overflow:hidden; background:#eceef2; }\n          .profile-post-item img, .profile-post-item video { width:100%; height:100%; object-fit:cover; display:block; }\n          .profile-post-item:hover .profile-post-overlay { opacity:1; }\n          .profile-post-overlay { position:absolute; inset:auto 0 0; padding:24px 10px 9px; color:#fff; font-size:11px; background:linear-gradient(transparent,rgba(0,0,0,.6)); opacity:0; transition:.18s; }\n          .profile-text-post { width:100%; height:100%; display:grid; place-items:center; padding:22px; text-align:center; font-weight:650; line-height:1.5; background:linear-gradient(135deg,#f2f3f6,#e6e8ed); }\n          .profile-empty { padding:70px 20px; text-align:center; color:#747780; }\n          .profile-empty-icon { width:60px; height:60px; border-radius:50%; margin:0 auto 12px; display:grid; place-items:center; background:#f0f1f4; color:#555861; }\n          .profile-empty h3 { margin:0 0 6px; color:#25262b; }\n          .profile-empty p { margin:0; }\n          @media (max-width:760px) {\n            .profile-main { flex-direction:column; align-items:center; text-align:center; padding:0 18px 24px; margin-top:-48px; }\n            .profile-avatar-large { width:104px; height:104px; min-width:104px; }\n            .profile-main-info { width:100%; padding-top:0; }\n            .profile-title-row { flex-direction:column; align-items:center; }\n            .profile-actions { justify-content:center; }\n            .profile-stats { justify-content:center; gap:18px; }\n            .profile-post-grid { grid-template-columns:repeat(3,1fr); }\n            .profile-cover { height:125px; }\n          }\n        `}</style>\n      <style>{`
         .fb-home-layout{display:grid;grid-template-columns:minmax(0,920px) 330px;gap:26px;justify-content:center;align-items:start;max-width:1280px;margin:0 auto;padding:8px 8px 48px;}
         .fb-home-main{min-width:0;}
         .content{padding-left:24px;padding-right:24px;}
@@ -1850,6 +1966,7 @@ async function blockUser(userId, reason = "Blocked by user") {
           {menu.map((item) => (
             <button
               key={item.key}
+              title={item.name}
               className={
                 active === item.key
                   ? "menu active"
@@ -2277,6 +2394,27 @@ async function blockUser(userId, reason = "Blocked by user") {
                           >
                             <span>{following[selectedUserProfile.id] ? t.following : t.follow}</span>
                           </button>
+                          {friendStatus === "none" && (
+                            <button className="profile-action primary" disabled={friendActionLoading} onClick={sendFriendRequest}>
+                              {friendActionLoading ? "Please wait..." : "Add friend"}
+                            </button>
+                          )}
+                          {friendStatus === "outgoing" && (
+                            <button className="profile-action secondary" disabled>Request sent</button>
+                          )}
+                          {friendStatus === "incoming" && (
+                            <>
+                              <button className="profile-action primary" disabled={friendActionLoading} onClick={() => respondToFriendRequest(true)}>
+                                Accept request
+                              </button>
+                              <button className="profile-action secondary" disabled={friendActionLoading} onClick={() => respondToFriendRequest(false)}>
+                                Decline
+                              </button>
+                            </>
+                          )}
+                          {friendStatus === "friends" && (
+                            <button className="profile-action secondary" disabled>Friends ✓</button>
+                          )}
                           <div className="profile-more-wrap" style={{ position: "relative" }}>
                             <details className="profile-more-menu">
                               <summary
@@ -2904,6 +3042,7 @@ async function blockUser(userId, reason = "Blocked by user") {
                         }}
                       >
                         <button
+                          title={user.full_name || user.username || "Open chat"}
                           onClick={() => openChat(user)}
                           style={{
                             display: "flex",
@@ -2945,8 +3084,15 @@ async function blockUser(userId, reason = "Blocked by user") {
 
                           <div>
                             <strong>
-                              {user.full_name ||
-                                "NEXORA User"}
+                              {user.full_name || "NEXORA User"}
+                              {user.verified_badge && (
+                                <span title="Verified account" aria-label="Verified account"
+                                  style={{ color: "#1877f2", marginLeft: 5 }}>✓</span>
+                              )}
+                              {user.heart_badge && (
+                                <span title="Heart badge" aria-label="Heart badge"
+                                  style={{ color: "#e11d48", marginLeft: 4 }}>♥</span>
+                              )}
                             </strong>
 
                             <div
@@ -3038,9 +3184,17 @@ async function blockUser(userId, reason = "Blocked by user") {
                     >
                       <div
                         className="avatar"
+                        role="button"
+                        tabIndex={0}
+                        title="Open profile"
+                        onClick={() => openUserProfile(selectedChat)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") openUserProfile(selectedChat);
+                        }}
                         style={{
                           width: "42px",
                           height: "42px",
+                          cursor: "pointer",
                         }}
                       >
                         {selectedChat.avatar_url ? (
@@ -3063,8 +3217,15 @@ async function blockUser(userId, reason = "Blocked by user") {
 
                       <div>
                         <strong>
-                          {selectedChat.full_name ||
-                            "NEXORA User"}
+                          {selectedChat.full_name || "NEXORA User"}
+                          {selectedChat.verified_badge && (
+                            <span title="Verified account" aria-label="Verified account"
+                              style={{ color: "#1877f2", marginLeft: 5 }}>✓</span>
+                          )}
+                          {selectedChat.heart_badge && (
+                            <span title="Heart badge" aria-label="Heart badge"
+                              style={{ color: "#e11d48", marginLeft: 4 }}>♥</span>
+                          )}
                         </strong>
 
                         <div
@@ -3252,6 +3413,11 @@ async function blockUser(userId, reason = "Blocked by user") {
           value={editUsername} onChange={e => setEditUsername(e.target.value)} />
         <textarea placeholder="Bio" value={editBio}
           onChange={e => setEditBio(e.target.value)} />
+        <label style={{display:"flex",alignItems:"center",gap:"10px",margin:"12px 0",cursor:"pointer"}}>
+          <input type="checkbox" checked={editIsPrivate}
+            onChange={e => setEditIsPrivate(e.target.checked)} />
+          <span><strong>حساب خاص</strong><small style={{display:"block",opacity:.75}}>منشوراتي الخاصة تظهر للأصدقاء المقبولين فقط.</small></span>
+        </label>
         <button className="primary-btn" onClick={saveProfile} disabled={saving}>
           {saving ? "Saving..." : "Save Changes"}
         </button>
@@ -3488,7 +3654,20 @@ async function blockUser(userId, reason = "Blocked by user") {
                       key={post.id}
                     >
                       <div className="post-header">
-                        <div className="avatar">
+                        <div
+                          className="avatar"
+                          role="button"
+                          tabIndex={0}
+                          title="Open profile"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => {
+                            if (postOwner) openUserProfile(postOwner);
+                            else if (post.user_id === session.user.id) setShowProfile(true);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && postOwner) openUserProfile(postOwner);
+                          }}
+                        >
                           {postOwnerAvatar ? (
                             <img
                               src={postOwnerAvatar}
