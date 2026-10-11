@@ -1357,6 +1357,42 @@ async function blockUser(userId, reason = "Blocked by user") {
     });
   }
 
+  async function openDeveloperChat() {
+    if (!session?.user?.id) {
+      setSaveMessage("سجّل الدخول أولاً للتواصل مع المطوّر.");
+      return;
+    }
+
+    if (profile?.is_owner) {
+      setSaveMessage("أنت مسجّل الدخول بحساب المطوّر.");
+      return;
+    }
+
+    const { data: developer, error } = await supabase
+      .from("profiles")
+      .select("id,username,full_name,avatar_url,bio,is_owner,heart_badge,verified_badge")
+      .eq("is_owner", true)
+      .neq("id", session.user.id)
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Find developer:", error);
+      setSaveMessage("تعذّر العثور على حساب المطوّر: " + error.message);
+      return;
+    }
+
+    if (!developer) {
+      setSaveMessage("لم يتم العثور على حساب مطوّر آخر. تأكد أن حساب المطوّر مُعلّم بخاصية is_owner في جدول profiles.");
+      return;
+    }
+
+    setActive("Messages");
+    setSelectedUserProfile(null);
+    setShowProfile(false);
+    await openChat(developer);
+  }
+
   async function loadConversation(userId) {
     if (!session || !userId) return;
 
@@ -2295,6 +2331,34 @@ async function blockUser(userId, reason = "Blocked by user") {
           <div>NEXORA</div>
           <div aria-label="علم مصر" title="مصر" style={{fontSize:25}}>🇪🇬</div>
         </div>
+
+        <button
+          type="button"
+          onClick={openDeveloperChat}
+          title="محادثة مباشرة مع مطوّر NEXORA"
+          style={{
+            width: "calc(100% - 20px)",
+            margin: "12px 10px",
+            padding: "12px 10px",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            textAlign: "start",
+            background: "#171717",
+            color: "#ffffff",
+            border: "1px solid #444",
+            borderRadius: "12px",
+            cursor: "pointer",
+          }}
+        >
+          <span style={{fontSize: "23px"}} aria-hidden="true">💬</span>
+          <span style={{display: "flex", flexDirection: "column", gap: "4px"}}>
+            <strong style={{fontSize: "13px"}}>تواصل مع المطوّر</strong>
+            <span style={{fontSize: "10px", opacity: 0.8}}>
+              محادثة مباشرة مع مطوّر NEXORA
+            </span>
+          </span>
+        </button>
 
         <nav>
           {menu.map((item) => (
