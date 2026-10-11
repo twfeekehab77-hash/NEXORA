@@ -524,13 +524,20 @@ async function blockUser(userId, reason = "Blocked by user") {
     setAdminBans(data || []);
   }
 
-  async function loadTotalNotifications() {
+  async function loadTotalNotifications(userId) {
+    if (!userId) {
+      setTotalNotifications(0);
+      return;
+    }
+
     const { count, error } = await supabase
       .from("notifications")
-      .select("id", { count: "exact", head: true });
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("is_read", false);
 
     if (error) {
-      console.error("Total notifications:", error);
+      console.error("Unread notifications:", error);
       return;
     }
 
@@ -571,7 +578,7 @@ async function blockUser(userId, reason = "Blocked by user") {
       loadTotalUsers(),
       loadBlockedUsers(userId),
       loadTotalPosts(),
-      loadTotalNotifications(),
+      loadTotalNotifications(userId),
     ]);
 
     if (userId === "e4a5054b-981a-483e-bcec-3017d120c13f") {
