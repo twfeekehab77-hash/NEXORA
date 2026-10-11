@@ -3349,26 +3349,110 @@ async function blockUser(userId, reason = "Blocked by user") {
             }}>
               {posts.filter((post) =>
                 post.media_url && post.media_type === "video"
-              ).map((post) => (
-                <article key={post.id} className="fb-home-card">
-                  <video
-                    src={post.media_url}
-                    controls
-                    playsInline
-                    preload="metadata"
-                    style={{
-                      width: "100%",
-                      maxHeight: "520px",
-                      objectFit: "contain",
-                      borderRadius: "12px",
-                      background: "#111"
-                    }}
-                  />
-                  <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>
-                    {post.content || ""}
-                  </p>
-                </article>
-              ))}
+              ).map((post) => {
+                const postLike = likes[post.id] || { count: 0, likedByMe: false };
+                const postComments = comments[post.id] || [];
+                const postOwner = postProfiles[post.user_id];
+
+                return (
+                  <article
+                    key={post.id}
+                    className="fb-home-card"
+                    style={{ padding: 16, textAlign: "left", overflow: "hidden" }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                      {postOwner?.avatar_url ? (
+                        <img
+                          src={postOwner.avatar_url}
+                          alt=""
+                          style={{ width: 42, height: 42, borderRadius: "50%", objectFit: "cover" }}
+                        />
+                      ) : (
+                        <div style={{ width: 42, height: 42, borderRadius: "50%", background: "#352044", display: "grid", placeItems: "center" }}>
+                          👤
+                        </div>
+                      )}
+                      <div>
+                        <strong>{postOwner?.full_name || postOwner?.username || "مستخدم NEXORA"}</strong>
+                        <div style={{ fontSize: 12, opacity: 0.7 }}>
+                          @{postOwner?.username || "user"}
+                        </div>
+                      </div>
+                    </div>
+
+                    <video
+                      src={post.media_url}
+                      controls
+                      playsInline
+                      preload="metadata"
+                      style={{
+                        width: "100%",
+                        maxHeight: "520px",
+                        objectFit: "contain",
+                        borderRadius: "12px",
+                        background: "#111"
+                      }}
+                    />
+
+                    {post.content && (
+                      <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", marginTop: 12 }}>
+                        {post.content}
+                      </p>
+                    )}
+
+                    <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", borderTop: "1px solid #493357", borderBottom: "1px solid #493357", padding: "12px 0", marginTop: 10 }}>
+                      <button
+                        type="button"
+                        onClick={() => toggleLike(post.id, "LIKE")}
+                        disabled={!session}
+                        style={{ border: 0, background: "transparent", color: postLike.likedByMe ? "#c084fc" : "inherit", cursor: session ? "pointer" : "not-allowed", fontWeight: 700 }}
+                      >
+                        {postLike.likedByMe ? "❤️ أعجبك" : "🤍 إعجاب"} · {postLike.count || 0}
+                      </button>
+                      <span>💬 {postComments.length} تعليق</span>
+                    </div>
+
+                    <div style={{ marginTop: 12 }}>
+                      {postComments.slice(-3).map((comment) => {
+                        const commenter = commentProfiles[comment.user_id];
+                        return (
+                          <div key={comment.id} style={{ padding: "7px 0", overflowWrap: "anywhere" }}>
+                            <strong style={{ marginRight: 7 }}>
+                              {commenter?.full_name || commenter?.username || "مستخدم"}
+                            </strong>
+                            <span>{comment.content}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                      <input
+                        type="text"
+                        value={commentText[post.id] || ""}
+                        onChange={(e) => setCommentText((prev) => ({ ...prev, [post.id]: e.target.value }))}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            createComment(post.id);
+                          }
+                        }}
+                        placeholder={session ? "اكتب تعليقًا..." : "سجّل الدخول للتعليق"}
+                        disabled={!session || !!commenting[post.id]}
+                        style={{ flex: 1, minWidth: 0, padding: 10, borderRadius: 9, border: "1px solid #68468a", background: "#17111f", color: "#fff" }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => createComment(post.id)}
+                        disabled={!session || !(commentText[post.id] || "").trim() || !!commenting[post.id]}
+                        style={{ padding: "9px 12px", border: 0, borderRadius: 9, background: "#8b5cf6", color: "#fff", cursor: "pointer" }}
+                      >
+                        {commenting[post.id] ? "..." : "إرسال"}
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
             {posts.filter((post) =>
               post.media_url && post.media_type === "video"
