@@ -2101,6 +2101,49 @@ async function blockUser(userId, reason = "Blocked by user") {
         @media(max-width:1200px){.fb-home-layout{grid-template-columns:minmax(0,820px);max-width:850px}.fb-home-right{display:none;}}
         @media(max-width:760px){.content{padding-left:10px;padding-right:10px}.fb-home-card{padding:16px}.fb-story{width:100px;min-width:100px}.fb-story-bg{height:155px}.fb-home-layout{display:block;padding:0 0 28px}.fb-mobile-page-title{display:flex;align-items:center;justify-content:space-between;padding:4px 2px 12px;color:#1c1e21}.fb-mobile-page-title strong{font-size:20px;letter-spacing:-.03em}.fb-mobile-page-title span{font-size:14px;color:#65676b}.fb-home-main{width:100%;}}
 
+
+        .nexora-topbar-brand{
+          display:flex;align-items:center;gap:9px;flex:none;
+          padding:5px 10px 5px 2px;
+          font-size:25px;font-weight:900;letter-spacing:-1px;
+          color:#7c3aed;
+          text-shadow:0 0 12px rgba(139,92,246,.25);
+          white-space:nowrap;
+        }
+        .nexora-topbar-brand-mark{
+          display:grid;place-items:center;width:34px;height:34px;
+          border-radius:11px;color:white;font-size:20px;font-weight:900;
+          background:linear-gradient(135deg,#a855f7,#6d28d9);
+          box-shadow:0 0 16px rgba(139,92,246,.38);
+        }
+        .nexora-topbar-action{
+          display:grid;place-items:center;flex:none;width:42px;height:42px;
+          border:0;border-radius:50%;background:#f0eaff;color:#6d28d9;
+          cursor:pointer;transition:transform .15s,background .15s;
+        }
+        .nexora-topbar-action:hover{
+          background:#e4d5ff;transform:translateY(-1px);
+        }
+        .nexora-top-nav{
+          border-radius:12px!important;
+          border-bottom:2px solid #e9d5ff!important;
+        }
+        .nexora-top-nav-item.active{
+          color:#7c3aed!important;
+          background:#f5f0ff!important;
+        }
+        .nexora-top-nav-item.active::after{
+          content:"";position:absolute;bottom:0;left:15%;right:15%;
+          height:3px;border-radius:5px 5px 0 0;background:#8b5cf6;
+        }
+        @media(max-width:760px){
+          .nexora-topbar-brand{font-size:21px;padding-right:4px;}
+          .nexora-topbar-brand-mark{width:30px;height:30px;}
+          .nexora-topbar-action{width:38px;height:38px;}
+          .nexora-top-nav{justify-content:flex-start!important;padding:5px!important;gap:3px!important;}
+          .nexora-top-nav-item{min-width:58px!important;padding:5px!important;}
+          .nexora-top-nav-label{font-size:10px!important;}
+        }
         .nexora-top-nav{display:flex;align-items:stretch;justify-content:center;gap:6px;max-width:1280px;margin:0 auto 14px;padding:6px 12px;background:rgba(255,255,255,.97);border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 5px 20px rgba(20,20,40,.06);overflow-x:auto;scrollbar-width:thin;}
         .nexora-top-nav-item{position:relative;flex:1;min-width:76px;max-width:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:58px;padding:6px 8px;border:0;border-radius:10px;background:transparent;color:#656873;cursor:pointer;font:inherit;transition:background .15s,color .15s;}
         .nexora-top-nav-item:hover{background:#f3f4f6;color:#17181c;}
@@ -2247,6 +2290,24 @@ async function blockUser(userId, reason = "Blocked by user") {
 
       <main className="content">
         <header className="topbar">
+          <div className="nexora-topbar-brand" aria-label="NEXORA">
+            <span className="nexora-topbar-brand-mark">N</span>
+            <span>NEXORA</span>
+          </div>
+          <button
+            type="button"
+            className="nexora-topbar-action"
+            title="Messenger"
+            aria-label="Open messages"
+            onClick={() => {
+              setActive("Messages");
+              setShowProfile(false);
+              setSelectedUserProfile(null);
+              loadUsers();
+            }}
+          >
+            <NIcon name="Message" size={21} />
+          </button>
           <div
             style={{
               position: "relative",
@@ -2495,6 +2556,23 @@ async function blockUser(userId, reason = "Blocked by user") {
               </div>
             )}
           </div>
+
+          <button
+            type="button"
+            className="nexora-topbar-action"
+            title="Create post"
+            aria-label="Create post"
+            onClick={() => {
+              setActive("Home");
+              setShowProfile(false);
+              setSelectedUserProfile(null);
+              setTimeout(() => {
+                document.getElementById("nexora-post-box")?.focus();
+              }, 100);
+            }}
+          >
+            <NIcon name="Plus" size={23} />
+          </button>
 
           <div className="profile-mini">
             {profile?.avatar_url ? (
