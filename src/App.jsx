@@ -1675,6 +1675,14 @@ async function blockUser(userId, reason = "Blocked by user") {
 
     if (!file) return;
 
+    if (file.type.startsWith("video/") && file.size > 50 * 1024 * 1024) {
+      setSaveMessage("حجم الفيديو أكبر من 50 ميجابايت. اختر فيديو أصغر.");
+      event.target.value = "";
+      return;
+    }
+
+    setSaveMessage("");
+
     if (mediaPreview) {
       URL.revokeObjectURL(mediaPreview);
     }
