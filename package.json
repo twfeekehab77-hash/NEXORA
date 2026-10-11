@@ -15,7 +15,8 @@
     "@capacitor/core": "^8.5.3",
     "@supabase/supabase-js": "^2.117.3",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "tls-sig-api-v2": "^1.0.2"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",
