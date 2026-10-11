@@ -259,6 +259,18 @@ function App() {
 
   const [loading, setLoading] = useState(true);
   const [active, setActive] = useState("Home");
+  const [nexoraGroups, setNexoraGroups] = useState([]);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupDescription, setNewGroupDescription] = useState("");
+  const [nexoraProducts, setNexoraProducts] = useState([]);
+  const [newProductName, setNewProductName] = useState("");
+  const [newProductPrice, setNewProductPrice] = useState("");
+  const [newProductDescription, setNewProductDescription] = useState("");
+  const [xoBoard, setXoBoard] = useState(Array(9).fill(""));
+  const [xoTurn, setXoTurn] = useState("X");
+  const [xoMessage, setXoMessage] = useState("دور اللاعب X");
+  const [diceValue, setDiceValue] = useState(1);
+
   const [showProfile, setShowProfile] = useState(false);
 
 const [ownProfileTab, setOwnProfileTab] = useState("posts");
@@ -1677,6 +1689,44 @@ async function blockUser(userId, reason = "Blocked by user") {
     };
   }
 
+
+  function playXO(index) {
+    if (
+      xoBoard[index] ||
+      xoMessage.includes("فاز") ||
+      xoMessage.includes("تعادل")
+    ) return;
+
+    const next = [...xoBoard];
+    next[index] = xoTurn;
+
+    const lines = [
+      [0,1,2], [3,4,5], [6,7,8],
+      [0,3,6], [1,4,7], [2,5,8],
+      [0,4,8], [2,4,6]
+    ];
+
+    setXoBoard(next);
+
+    if (lines.some(([a,b,c]) =>
+      next[a] && next[a] === next[b] && next[a] === next[c]
+    )) {
+      setXoMessage(`اللاعب ${xoTurn} فاز!`);
+    } else if (next.every(Boolean)) {
+      setXoMessage("تعادل! ابدأ جولة جديدة.");
+    } else {
+      const other = xoTurn === "X" ? "O" : "X";
+      setXoTurn(other);
+      setXoMessage(`دور اللاعب ${other}`);
+    }
+  }
+
+  function resetXO() {
+    setXoBoard(Array(9).fill(""));
+    setXoTurn("X");
+    setXoMessage("دور اللاعب X");
+  }
+
   async function createPost() {
     const text = postText.trim();
 
@@ -2631,6 +2681,77 @@ async function blockUser(userId, reason = "Blocked by user") {
             justify-content: center !important;
           }
         `}</style>
+        {/* NEXORA_DARK_PURPLE_THEME */}
+        <style>{`
+          .nexora {
+            background:#090710 !important;
+            color:#f5f3ff !important;
+          }
+          .nexora .content,
+          .nexora .welcome,
+          .nexora .fb-home-layout {
+            background:#0c0a13 !important;
+            color:#f5f3ff !important;
+          }
+          .nexora .topbar,
+          .nexora .nexora-top-nav {
+            background:#130e1d !important;
+            color:#f5f3ff !important;
+            border-color:#352542 !important;
+          }
+          .nexora .nexora-top-nav-item {
+            color:#c4b5fd !important;
+          }
+          .nexora .nexora-top-nav-item:hover,
+          .nexora .nexora-top-nav-item.active {
+            background:#2a1740 !important;
+            color:#e9d5ff !important;
+          }
+          .nexora .fb-home-card,
+          .nexora .fb-right-card,
+          .nexora .own-profile-edit-form,
+          .nexora .own-profile-post,
+          .nexora .own-profile-tabs {
+            background:#171220 !important;
+            color:#f5f3ff !important;
+            border-color:#352542 !important;
+          }
+          .nexora .fb-section-title,
+          .nexora .fb-feed-heading,
+          .nexora .fb-feed-heading h2,
+          .nexora .fb-feed-heading p,
+          .nexora .welcome h2,
+          .nexora .welcome p,
+          .nexora .own-profile-bio {
+            color:#f5f3ff !important;
+          }
+          .nexora input,
+          .nexora textarea,
+          .nexora select,
+          .nexora .fb-composer-input,
+          .nexora .fb-post-textarea {
+            background:#100c19 !important;
+            color:#f5f3ff !important;
+            border-color:#49345e !important;
+          }
+          .nexora input::placeholder,
+          .nexora textarea::placeholder {
+            color:#b5a6c8 !important;
+          }
+          .nexora .fb-action {
+            color:#d8b4fe !important;
+          }
+          .nexora .fb-publish,
+          .nexora .primary-btn {
+            background:linear-gradient(135deg,#7c3aed,#a855f7) !important;
+            color:#fff !important;
+          }
+          .nexora .sidebar {
+            background:#100c19 !important;
+            color:#f5f3ff !important;
+            border-color:#352542 !important;
+          }
+        `}</style>
         <nav className="nexora-top-nav" aria-label="Main navigation">
           {menu.map((item) => (
             <button
@@ -3135,41 +3256,89 @@ async function blockUser(userId, reason = "Blocked by user") {
               </div>
             </div>
           </section>
-        ) : ["Marketplace", "Groups", "Gaming"].includes(active) ? (
+        ) : active === "Groups" ? (
           <section className="welcome">
-            <div style={{maxWidth:760,margin:"0 auto",padding:"28px 12px"}}>
-              <div style={{fontSize:42,marginBottom:12}}>
-                {active === "Marketplace" ? "🛍️" : active === "Groups" ? "👥" : "🎮"}
+            <div style={{maxWidth:850,margin:"0 auto",padding:24}}>
+              <h2>👥 مجموعات NEXORA</h2>
+              <p>أنشئ مجموعة وشارك اهتماماتك مع الآخرين.</p>
+              <div className="fb-home-card" style={{padding:18}}>
+                <input value={newGroupName} onChange={e=>setNewGroupName(e.target.value)} placeholder="اسم المجموعة" style={{width:"100%",padding:12,marginBottom:10,borderRadius:10}} />
+                <textarea value={newGroupDescription} onChange={e=>setNewGroupDescription(e.target.value)} placeholder="وصف المجموعة" rows={3} style={{width:"100%",padding:12,marginBottom:10,borderRadius:10}} />
+                <button type="button" onClick={()=>{if(!newGroupName.trim())return;setNexoraGroups(old=>[{id:Date.now(),name:newGroupName.trim(),description:newGroupDescription.trim()},...old]);setNewGroupName("");setNewGroupDescription("");}} style={{padding:"10px 16px",border:0,borderRadius:9,background:"#8b5cf6",color:"#fff",cursor:"pointer"}}>＋ إنشاء مجموعة</button>
               </div>
-              <h2 style={{marginBottom:8}}>
-                {active === "Marketplace" ? "Marketplace" :
-                 active === "Groups" ? "Groups" : "Gaming"}
-              </h2>
-              <p style={{color:"#65676b",lineHeight:1.7}}>
-                {active === "Marketplace"
-                  ? "Discover and share items with the NEXORA community."
-                  : active === "Groups"
-                  ? "Find people who share your interests and build a community."
-                  : "Explore the gaming community on NEXORA."}
-              </p>
-              <div className="fb-right-card" style={{marginTop:22,padding:22}}>
-                <strong>Coming soon</strong>
-                <p style={{marginBottom:0,color:"#65676b",lineHeight:1.7}}>
-                  This section is an initial interface. Its full features and database
-                  integration have not been implemented yet.
-                </p>
+              {nexoraGroups.map(g=><article key={g.id} className="fb-home-card" style={{padding:18,marginTop:12}}><h3>{g.name}</h3><p>{g.description}</p><small>محفوظة مؤقتًا في الواجهة فقط</small></article>)}
+            </div>
+          </section>
+        ) : active === "Marketplace" ? (
+          <section className="welcome">
+            <div style={{maxWidth:850,margin:"0 auto",padding:24}}>
+              <h2>🛍️ سوق NEXORA</h2>
+              <p>أضف منتجًا مع السعر والوصف.</p>
+              <div className="fb-home-card" style={{padding:18}}>
+                <input value={newProductName} onChange={e=>setNewProductName(e.target.value)} placeholder="اسم المنتج" style={{width:"100%",padding:12,marginBottom:10,borderRadius:10}} />
+                <input type="number" min="0" value={newProductPrice} onChange={e=>setNewProductPrice(e.target.value)} placeholder="السعر" style={{width:"100%",padding:12,marginBottom:10,borderRadius:10}} />
+                <textarea value={newProductDescription} onChange={e=>setNewProductDescription(e.target.value)} placeholder="وصف المنتج" rows={3} style={{width:"100%",padding:12,marginBottom:10,borderRadius:10}} />
+                <button type="button" onClick={()=>{if(!newProductName.trim()||newProductPrice==="")return;setNexoraProducts(old=>[{id:Date.now(),name:newProductName.trim(),price:newProductPrice,description:newProductDescription.trim()},...old]);setNewProductName("");setNewProductPrice("");setNewProductDescription("");}} style={{padding:"10px 16px",border:0,borderRadius:9,background:"#8b5cf6",color:"#fff",cursor:"pointer"}}>＋ نشر المنتج</button>
               </div>
-              <button
-                type="button"
-                onClick={() => setActive("Home")}
-                style={{marginTop:18,padding:"10px 16px",border:0,borderRadius:9,background:"#1877f2",color:"#fff",fontWeight:700,cursor:"pointer"}}
-              >
-                Back to Home
-              </button>
+              {nexoraProducts.map(item=><article key={item.id} className="fb-home-card" style={{padding:18,marginTop:12}}><h3>🛍️ {item.name}</h3><strong>{item.price}</strong><p>{item.description}</p><small>محفوظ مؤقتًا في الواجهة فقط</small></article>)}
+            </div>
+          </section>
+        ) : active === "Gaming" ? (
+          <section className="welcome">
+            <div style={{maxWidth:650,margin:"0 auto",padding:24}}>
+              <h2>🎮 ألعاب NEXORA</h2>
+              <div className="fb-home-card" style={{padding:18,marginTop:16}}>
+                <h3>⭕❌ لعبة XO</h3>
+                <p>{xoMessage}</p>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(3, minmax(60px, 90px))",gap:8,justifyContent:"center"}}>
+                  {xoBoard.map((cell,i)=><button key={i} type="button" onClick={()=>playXO(i)} style={{height:75,borderRadius:10,border:"1px solid #68468a",background:"#21162f",color:"#fff",fontSize:30,cursor:"pointer"}}>{cell}</button>)}
+                </div>
+                <button type="button" onClick={resetXO} style={{marginTop:14,padding:"9px 14px",border:0,borderRadius:9,background:"#8b5cf6",color:"#fff",cursor:"pointer"}}>جولة جديدة</button>
+              </div>
+              <div className="fb-home-card" style={{padding:18,marginTop:16}}>
+                <h3>🎲 لعبة النرد</h3>
+                <div style={{fontSize:48}}>{["","⚀","⚁","⚂","⚃","⚄","⚅"][diceValue]}</div>
+                <p>النتيجة: {diceValue}</p>
+                <button type="button" onClick={()=>setDiceValue(Math.floor(Math.random()*6)+1)} style={{padding:"9px 14px",border:0,borderRadius:9,background:"#8b5cf6",color:"#fff",cursor:"pointer"}}>ارمِ النرد</button>
+              </div>
             </div>
           </section>
         ) : active === "Reels" ? (
           <section className="welcome">
+            <div className="fb-home-card" style={{maxWidth:760,margin:"20px auto",padding:18,textAlign:"left"}}>
+              <h3>＋ نشر فيديو جديد</h3>
+              <input
+                type="text"
+                value={postText}
+                onChange={(e) => setPostText(e.target.value)}
+                placeholder="اكتب وصف الفيديو..."
+                style={{width:"100%",padding:12,marginBottom:12,borderRadius:10}}
+              />
+              <input
+                type="file"
+                accept="video/*"
+                onChange={handleMediaSelect}
+                style={{display:"block",width:"100%",marginBottom:12}}
+              />
+              {selectedMedia?.type?.startsWith("video/") && mediaPreview && (
+                <video
+                  src={mediaPreview}
+                  controls
+                  playsInline
+                  style={{width:"100%",maxHeight:360,borderRadius:12,marginBottom:12,background:"#111"}}
+                />
+              )}
+              <button
+                type="button"
+                onClick={createPost}
+                disabled={posting || !session || !selectedMedia?.type?.startsWith("video/")}
+                style={{padding:"10px 18px",border:0,borderRadius:9,background:"#8b5cf6",color:"#fff",fontWeight:700,cursor:"pointer",opacity:posting || !session || !selectedMedia?.type?.startsWith("video/") ? 0.6 : 1}}
+              >
+                {posting ? "جارٍ النشر..." : "نشر الفيديو"}
+              </button>
+              {!session && <p style={{marginTop:10}}>سجّل الدخول أولًا لنشر الفيديو.</p>}
+              {saveMessage && <p style={{marginTop:10}}>{saveMessage}</p>}
+            </div>
             <h2>🎬 Reels</h2>
             <p>Watch video posts shared on NEXORA.</p>
             <div style={{
