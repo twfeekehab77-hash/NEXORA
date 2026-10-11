@@ -2182,6 +2182,23 @@ async function blockUser(userId, reason = "Blocked by user") {
           }
         }
 `}</style>
+      <style>{`
+        .nexora {
+          display: block !important;
+          width: 100% !important;
+          min-width: 0 !important;
+        }
+        .nexora > .sidebar {
+          display: none !important;
+        }
+        .nexora > .content {
+          width: 100% !important;
+          max-width: none !important;
+          min-width: 0 !important;
+          margin-left: 0 !important;
+          box-sizing: border-box !important;
+        }
+      `}</style>
       <aside className="sidebar">
         <div className="logo">NEXORA</div>
 
