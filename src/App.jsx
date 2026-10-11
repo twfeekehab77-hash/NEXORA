@@ -272,6 +272,7 @@ function App() {
   const [diceValue, setDiceValue] = useState(1);
 
   const [showProfile, setShowProfile] = useState(false);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
 
 const [ownProfileTab, setOwnProfileTab] = useState("posts");
 const [isEditingOwnProfile, setIsEditingOwnProfile] = useState(false);
@@ -2663,6 +2664,158 @@ async function blockUser(userId, reason = "Blocked by user") {
           >
             <NIcon name="Plus" size={23} />
           </button>
+
+          <div
+            style={{ position: "relative", marginLeft: "8px" }}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) {
+                setShowAccountMenu(false);
+              }
+            }}
+          >
+            <button
+              type="button"
+              className="nexora-topbar-action"
+              title="Account menu"
+              aria-label="Open account menu"
+              aria-expanded={showAccountMenu}
+              onClick={() => setShowAccountMenu((open) => !open)}
+            >
+              <NIcon name="More" size={23} />
+            </button>
+
+            {showAccountMenu && (
+              <div
+                role="menu"
+                aria-label="Account menu"
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 10px)",
+                  right: 0,
+                  width: "min(290px, calc(100vw - 28px))",
+                  padding: "10px",
+                  background: "#fff",
+                  color: "#1c1e21",
+                  border: "1px solid #e4e6eb",
+                  borderRadius: "16px",
+                  boxShadow: "0 12px 35px rgba(0,0,0,.18)",
+                  zIndex: 10000,
+                }}
+              >
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "10px",
+                  marginBottom: "6px",
+                  borderBottom: "1px solid #eee",
+                }}>
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt=""
+                      style={{
+                        width: "42px",
+                        height: "42px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <span style={{
+                      width: "42px",
+                      height: "42px",
+                      borderRadius: "50%",
+                      background: "#e4e6eb",
+                      display: "grid",
+                      placeItems: "center",
+                      fontWeight: 800,
+                    }}>{avatarLetter}</span>
+                  )}
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{
+                      fontWeight: 800,
+                      overflowWrap: "anywhere",
+                    }}>{profile?.full_name || profile?.username || "NEXORA User"}</div>
+                    <div style={{ fontSize: "12px", color: "#65676b", marginTop: "3px" }}>
+                      {profile?.verified_badge ? "✓ حساب موثّق" : "حساب غير موثّق"}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setActive("Profile");
+                    setShowProfile(true);
+                    setSelectedUserProfile(null);
+                    setShowAccountMenu(false);
+                  }}
+                  style={{
+                    display: "block", width: "100%", padding: "12px",
+                    border: 0, borderRadius: "10px", background: "transparent",
+                    color: "inherit", textAlign: "start", cursor: "pointer",
+                    font: "inherit", fontWeight: 650,
+                  }}
+                >👤 الملف الشخصي</button>
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setActive("Messages");
+                    setShowProfile(false);
+                    setSelectedUserProfile(null);
+                    setShowAccountMenu(false);
+                    loadUsers();
+                  }}
+                  style={{
+                    display: "block", width: "100%", padding: "12px",
+                    border: 0, borderRadius: "10px", background: "transparent",
+                    color: "inherit", textAlign: "start", cursor: "pointer",
+                    font: "inherit", fontWeight: 650,
+                  }}
+                >💬 الرسائل</button>
+
+                {profile?.is_owner && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setActive("Developer");
+                      setShowProfile(false);
+                      setSelectedUserProfile(null);
+                      setShowAccountMenu(false);
+                    }}
+                    style={{
+                      display: "block", width: "100%", padding: "12px",
+                      border: 0, borderRadius: "10px", background: "transparent",
+                      color: "inherit", textAlign: "start", cursor: "pointer",
+                      font: "inherit", fontWeight: 650,
+                    }}
+                  >👑 لوحة تحكم المطوّر</button>
+                )}
+
+                <div style={{ height: "1px", background: "#eee", margin: "6px 0" }} />
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={async () => {
+                    setShowAccountMenu(false);
+                    await handleLogout();
+                  }}
+                  style={{
+                    display: "block", width: "100%", padding: "12px",
+                    border: 0, borderRadius: "10px", background: "#fff1f0",
+                    color: "#c5221f", textAlign: "start", cursor: "pointer",
+                    font: "inherit", fontWeight: 750,
+                  }}
+                >↪ تسجيل الخروج</button>
+              </div>
+            )}
+          </div>
 
           <div className="profile-mini">
             {profile?.avatar_url ? (
