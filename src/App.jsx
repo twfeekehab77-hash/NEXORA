@@ -273,6 +273,10 @@ function App() {
 
   const [showProfile, setShowProfile] = useState(false);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const [settingsPassword, setSettingsPassword] = useState("");
+  const [settingsPasswordConfirm, setSettingsPasswordConfirm] = useState("");
+  const [settingsMessage, setSettingsMessage] = useState("");
+  const [settingsSaving, setSettingsSaving] = useState(false);
 
 const [ownProfileTab, setOwnProfileTab] = useState("posts");
 const [isEditingOwnProfile, setIsEditingOwnProfile] = useState(false);
@@ -2778,6 +2782,24 @@ async function blockUser(userId, reason = "Blocked by user") {
                   }}
                 >💬 الرسائل</button>
 
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setActive("Settings");
+                    setShowProfile(false);
+                    setSelectedUserProfile(null);
+                    setShowAccountMenu(false);
+                    setSettingsMessage("");
+                  }}
+                  style={{
+                    display: "block", width: "100%", padding: "12px",
+                    border: 0, borderRadius: "10px", background: "transparent",
+                    color: "inherit", textAlign: "start", cursor: "pointer",
+                    font: "inherit", fontWeight: 650,
+                  }}
+                >⚙️ {t.settings || "الإعدادات"}</button>
+
                 {profile?.is_owner && (
                   <button
                     type="button"
@@ -3251,6 +3273,141 @@ async function blockUser(userId, reason = "Blocked by user") {
                 </div>
               </>
             )}
+          </section>
+        ) : active === "Settings" ? (
+          <section className="welcome" style={{ maxWidth: 850, margin: "0 auto" }}>
+            <h2>⚙️ {t.settings || "الإعدادات"}</h2>
+            <p>إدارة أمان حسابك وتفضيلات NEXORA من مكان واحد.</p>
+
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+              gap: 16,
+              marginTop: 22
+            }}>
+              <div className="fb-right-card" style={{ padding: 20, borderRadius: 16 }}>
+                <h3>🌐 {t.language || "اللغة"}</h3>
+                <p>اختر لغة واجهة التطبيق.</p>
+                <select
+                  aria-label={t.language || "اللغة"}
+                  value={language}
+                  onChange={(event) => changeLanguage(event.target.value)}
+                  style={{
+                    width: "100%", padding: 12, borderRadius: 10,
+                    border: "1px solid #49345e", marginTop: 8
+                  }}
+                >
+                  {languages.map((item) => (
+                    <option key={item.code} value={item.code}>
+                      {item.flag} {item.native}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="fb-right-card" style={{ padding: 20, borderRadius: 16 }}>
+                <h3>🔐 أمان الحساب</h3>
+                <p>اختر كلمة مرور جديدة لا تقل عن 6 أحرف.</p>
+                <form
+                  onSubmit={async (event) => {
+                    event.preventDefault();
+                    setSettingsMessage("");
+                    if (settingsPassword.length < 6) {
+                      setSettingsMessage("كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
+                      return;
+                    }
+                    if (settingsPassword !== settingsPasswordConfirm) {
+                      setSettingsMessage("كلمتا المرور غير متطابقتين.");
+                      return;
+                    }
+                    setSettingsSaving(true);
+                    try {
+                      const { error } = await supabase.auth.updateUser({
+                        password: settingsPassword
+                      });
+                      if (error) throw error;
+                      setSettingsMessage("تم تحديث كلمة المرور بنجاح.");
+                      setSettingsPassword("");
+                      setSettingsPasswordConfirm("");
+                    } catch (error) {
+                      setSettingsMessage(error?.message || "تعذر تحديث كلمة المرور.");
+                    } finally {
+                      setSettingsSaving(false);
+                    }
+                  }}
+                  style={{ display: "grid", gap: 10, marginTop: 12 }}
+                >
+                  <input
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    minLength={6}
+                    value={settingsPassword}
+                    onChange={(event) => setSettingsPassword(event.target.value)}
+                    placeholder="كلمة المرور الجديدة"
+                    aria-label="كلمة المرور الجديدة"
+                  />
+                  <input
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    minLength={6}
+                    value={settingsPasswordConfirm}
+                    onChange={(event) => setSettingsPasswordConfirm(event.target.value)}
+                    placeholder="تأكيد كلمة المرور"
+                    aria-label="تأكيد كلمة المرور"
+                  />
+                  <button
+                    type="submit"
+                    disabled={settingsSaving}
+                    style={{
+                      padding: 12, border: 0, borderRadius: 10,
+                      background: "#8b5cf6", color: "#fff",
+                      cursor: settingsSaving ? "wait" : "pointer",
+                      fontWeight: 750
+                    }}
+                  >
+                    {settingsSaving ? "جارٍ الحفظ..." : "تحديث كلمة المرور"}
+                  </button>
+                </form>
+                {settingsMessage && (
+                  <p role="status" aria-live="polite" style={{ marginTop: 12, overflowWrap: "anywhere" }}>
+                    {settingsMessage}
+                  </p>
+                )}
+              </div>
+
+              <div className="fb-right-card" style={{ padding: 20, borderRadius: 16 }}>
+                <h3>🛡️ الخصوصية والملف الشخصي</h3>
+                <p>تعديل بيانات ملفك وإعداد خصوصية الحساب من صفحة الملف الشخصي.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActive("Profile");
+                    setShowProfile(true);
+                    setSelectedUserProfile(null);
+                    setIsEditingOwnProfile(true);
+                  }}
+                  style={{
+                    padding: 12, border: 0, borderRadius: 10,
+                    background: "#8b5cf6", color: "#fff",
+                    cursor: "pointer", fontWeight: 750
+                  }}
+                >
+                  إدارة الملف والخصوصية
+                </button>
+              </div>
+
+              <div className="fb-right-card" style={{ padding: 20, borderRadius: 16 }}>
+                <h3>🎨 المظهر</h3>
+                <p>المظهر الداكن البنفسجي مفعّل حاليًا في واجهة NEXORA.</p>
+                <span style={{
+                  display: "inline-block", padding: "7px 12px",
+                  borderRadius: 999, background: "#2a1740", color: "#e9d5ff",
+                  fontWeight: 700, marginTop: 8
+                }}>Dark Purple</span>
+              </div>
+            </div>
           </section>
         ) : active === "Developer" && profile?.is_owner ? (
           <section className="welcome">
