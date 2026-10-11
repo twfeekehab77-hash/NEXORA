@@ -2610,6 +2610,27 @@ async function blockUser(userId, reason = "Blocked by user") {
           </div>
         </header>
 
+        <style>{`
+          .nexora-top-nav {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            align-items: stretch !important;
+            justify-content: space-around !important;
+            width: 100% !important;
+            max-width: 1280px !important;
+            margin: 0 auto 14px !important;
+            box-sizing: border-box !important;
+            overflow-x: auto !important;
+          }
+          .nexora-top-nav-item {
+            display: flex !important;
+            flex: 1 0 92px !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+        `}</style>
         <nav className="nexora-top-nav" aria-label="Main navigation">
           {menu.map((item) => (
             <button
