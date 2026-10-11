@@ -918,7 +918,23 @@ async function blockUser(userId, reason = "Blocked by user") {
     if (!user || !session) return;
 
     setUserProfileLoading(true);
-    setSelectedUserProfile(user);
+
+    const { data: freshProfile, error: freshProfileError } = await supabase
+      .from("profiles")
+      .select("id,username,full_name,avatar_url,bio,is_owner,heart_badge,verified_badge,is_private")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (freshProfileError || !freshProfile) {
+      console.error(
+        "Load profile privacy:",
+        freshProfileError || "Profile not found"
+      );
+      setUserProfileLoading(false);
+      return;
+    }
+
+    setSelectedUserProfile({ ...user, ...freshProfile });
     setSelectedUserPosts([]);
     setSelectedUserFollowers(0);
     setSelectedUserFollowing(0);
@@ -2999,7 +3015,27 @@ async function blockUser(userId, reason = "Blocked by user") {
                     ))}
                   </div>
 
-                  {visibleProfilePosts.length === 0 ? (
+                  {selectedUserProfile.is_private &&
+                  selectedUserProfile.id !== session?.user?.id &&
+                  friendStatus !== "friends" ? (
+                    <div
+                      className="profile-empty"
+                      role="status"
+                      style={{ padding: "42px 20px", textAlign: "center" }}
+                    >
+                      <div
+                        className="profile-empty-icon"
+                        style={{ fontSize: "32px" }}
+                      >
+                        🔒
+                      </div>
+                      <h3>This account is private</h3>
+                      <p>
+                        Add this user as a friend and wait for acceptance
+                        to see their posts, photos, and videos.
+                      </p>
+                    </div>
+                  ) : visibleProfilePosts.length === 0 ? (
                     <div className="profile-empty">
                       <div className="profile-empty-icon"><NIcon name="Profile" size={28} /></div>
                       <h3>
