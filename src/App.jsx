@@ -1675,12 +1675,6 @@ async function blockUser(userId, reason = "Blocked by user") {
 
     if (!file) return;
 
-    if (file.type.startsWith("video/") && file.size > 50 * 1024 * 1024) {
-      setSaveMessage("حجم الفيديو أكبر من 50 ميجابايت. اختر فيديو أصغر.");
-      event.target.value = "";
-      return;
-    }
-
     setSaveMessage("");
 
     if (mediaPreview) {
@@ -2297,7 +2291,10 @@ async function blockUser(userId, reason = "Blocked by user") {
         }
       `}</style>
       <aside className="sidebar">
-        <div className="logo">NEXORA</div>
+        <div className="logo" style={{textAlign:"center",lineHeight:1.4}}>
+          <div>NEXORA</div>
+          <div aria-label="علم مصر" title="مصر" style={{fontSize:25}}>🇪🇬</div>
+        </div>
 
         <nav>
           {menu.map((item) => (
@@ -2404,9 +2401,13 @@ async function blockUser(userId, reason = "Blocked by user") {
 
       <main className="content">
         <header className="topbar">
-          <div className="nexora-topbar-brand" aria-label="NEXORA">
+          <div className="nexora-topbar-brand" aria-label="NEXORA مصر"
+            style={{display:"flex",alignItems:"center",gap:8}}>
             <span className="nexora-topbar-brand-mark">N</span>
-            <span>NEXORA</span>
+            <span style={{display:"flex",flexDirection:"column",alignItems:"center",lineHeight:1.15}}>
+              <span>NEXORA</span>
+              <span aria-label="علم مصر" title="مصر" style={{fontSize:19}}>🇪🇬</span>
+            </span>
           </div>
           <button
             type="button"
@@ -4364,6 +4365,7 @@ async function blockUser(userId, reason = "Blocked by user") {
   {profile?.full_name || editName || "Your name"}
   {profile?.verified_badge && <span title="NEXORA Verified" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"17px",height:"17px",marginLeft:"5px",borderRadius:"50%",background:"#1877f2",color:"#fff",fontSize:"12px",fontWeight:"900",verticalAlign:"middle"}}>✓</span>}
   {profile?.heart_badge && <span title="NEXORA Heart Badge" style={{marginLeft:"4px"}}>❤️</span>}
+  {profile?.is_owner && <span title="NEXORA Owner" style={{display:"inline-block",marginInlineStart:6,padding:"3px 8px",borderRadius:999,background:"linear-gradient(135deg,#f59e0b,#facc15,#d97706)",color:"#fff",fontSize:11,fontWeight:800,verticalAlign:"middle"}}>👑 OWNER</span>}
 </h2>
             <p className="own-profile-username">
               @{profile?.username || editUsername || "username"}
