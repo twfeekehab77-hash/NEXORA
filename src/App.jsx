@@ -213,6 +213,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [messageText, setMessageText] = useState("");
+  const [replyingTo, setReplyingTo] = useState(null);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
 
@@ -1403,7 +1404,7 @@ async function blockUser(userId, reason = "Blocked by user") {
 
     const { data, error } = await supabase
       .from("messages")
-      .select("id,sender_id,receiver_id,content,created_at")
+      .select("id,sender_id,receiver_id,content,created_at,reply_to")
       .or(
         `and(sender_id.eq.${currentUserId},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${currentUserId})`
       )
@@ -1424,6 +1425,7 @@ async function blockUser(userId, reason = "Blocked by user") {
     setSelectedChat(user);
     setMessages([]);
     setMessageText("");
+    setReplyingTo(null);
 
     await loadConversation(user.id);
 
@@ -1459,8 +1461,9 @@ async function blockUser(userId, reason = "Blocked by user") {
         sender_id: session.user.id,
         receiver_id: selectedChat.id,
         content: text,
+        reply_to: replyingTo?.id || null,
       })
-      .select("id,sender_id,receiver_id,content,created_at")
+      .select("id,sender_id,receiver_id,content,created_at,reply_to")
       .single();
 
     if (error) {
@@ -1475,6 +1478,7 @@ async function blockUser(userId, reason = "Blocked by user") {
     }
 
     setMessageText("");
+    setReplyingTo(null);
     setSendingMessage(false);
   }
 
@@ -4356,7 +4360,42 @@ async function blockUser(userId, reason = "Blocked by user") {
                                   mine ? "16px" : "4px",
                               }}
                             >
+                              {message.reply_to && (() => {
+                                const original = messages.find(
+                                  (item) => item.id === message.reply_to
+                                );
+                                return original ? (
+                                  <div style={{
+                                    borderLeft: "3px solid currentColor",
+                                    paddingLeft: "8px",
+                                    marginBottom: "7px",
+                                    opacity: 0.8,
+                                    fontSize: "12px"
+                                  }}>
+                                    <div>Replying to</div>
+                                    <div>{original.content}</div>
+                                  </div>
+                                ) : null;
+                              })()}
+
                               <div>{message.content}</div>
+
+                              <button
+                                type="button"
+                                onClick={() => setReplyingTo(message)}
+                                style={{
+                                  marginTop: "6px",
+                                  padding: "3px 7px",
+                                  border: "1px solid currentColor",
+                                  borderRadius: "7px",
+                                  background: "transparent",
+                                  color: "inherit",
+                                  cursor: "pointer",
+                                  fontSize: "11px"
+                                }}
+                              >
+                                Reply
+                              </button>
 
                               <small
                                 style={{
@@ -4378,6 +4417,35 @@ async function blockUser(userId, reason = "Blocked by user") {
                         })
                       )}
                     </div>
+
+                    {replyingTo && (
+                      <div style={{
+                        margin: "0 12px",
+                        padding: "8px 12px",
+                        borderLeft: "3px solid #7c3aed",
+                        background: "rgba(124,58,237,0.08)",
+                        borderRadius: "8px"
+                      }}>
+                        <div style={{fontSize: "12px", opacity: 0.7}}>
+                          Replying to
+                        </div>
+                        <div style={{fontSize: "13px"}}>
+                          {replyingTo.content}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setReplyingTo(null)}
+                          style={{
+                            marginTop: "5px",
+                            border: 0,
+                            background: "transparent",
+                            cursor: "pointer"
+                          }}
+                        >
+                          Cancel reply
+                        </button>
+                      </div>
+                    )}
 
                     <div
                       style={{
