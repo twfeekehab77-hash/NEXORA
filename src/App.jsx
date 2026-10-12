@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Login from "./Login";
+import CallManager from "./CallManager";
 import { supabase } from "./lib/supabaseClient";
 import { getSavedLanguage, getTranslations, applyLanguage, languages } from "./i18n";
 import "./App.css";
@@ -4291,6 +4292,15 @@ async function blockUser(userId, reason = "Blocked by user") {
                             "user"}
                         </div>
                       </div>
+                      <div
+                        id="nexora-call-actions"
+                        style={{
+                          marginInlineStart: "auto",
+                          display: "flex",
+                          gap: "8px",
+                          alignItems: "center",
+                        }}
+                      />
                     </div>
 
                     <div
@@ -5238,6 +5248,7 @@ async function blockUser(userId, reason = "Blocked by user") {
           </section>
         </div>
       )}
+      <CallManager session={session} selectedChat={selectedChat} />
       </main>
     </div>
   );
